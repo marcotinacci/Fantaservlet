@@ -57,7 +57,11 @@ public class DBConnection {
 			System.err.println("Error with connection: " + e);
 		}		
 	}
-	
+	/**
+	 * Metodo che prende le squadre appartenenti ad un certo utente
+	 * @param uid identificatore utente
+	 * @return 
+	 */
 	public ArrayList<Integer> getTeams(int uid){
 		ArrayList<Integer> resArray = new ArrayList<Integer>();		
 		try 
