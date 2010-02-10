@@ -1,0 +1,77 @@
+/**
+ * 
+ */
+package dbconnection;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Properties;
+
+/**
+ * @author Michael
+ *
+ */
+public class DBConnection {
+	
+	public static void main(String args[]){
+		DBConnection dbc = new DBConnection();
+		dbc.init();
+		System.out.println("Squadre dell'utente 1: "+dbc.getTeams(1));
+		dbc.destroy();
+	}
+	
+	private final String driver = "com.mysql.jdbc.Driver";
+	protected final String url = "jdbc:mysql://localhost:3306/fsdb";
+	protected Properties userInfo = new Properties();
+	protected Connection connection;
+	protected Statement statement;
+	
+	public DBConnection(){}
+	
+	public void init(){
+		userInfo.put("user", "root");
+		userInfo.put("password", "");
+		
+		try {
+			// Load the driver. NOT NEEDED in Java 6!
+			Class.forName(driver);
+			
+			// Establish network connection to database.
+			connection = DriverManager.getConnection(url, userInfo);
+			
+			// Create a statement for executing queries.
+			statement = connection.createStatement();
+			
+		} catch(Exception e) {
+			System.err.println("Error with connection: " + e);
+		}
+	}
+	
+	public void destroy() {
+		try {
+			connection.close();			
+		} catch(Exception e) {
+			System.err.println("Error with connection: " + e);
+		}		
+	}
+	
+	public ArrayList<Integer> getTeams(int uid){
+		ArrayList<Integer> resArray = new ArrayList<Integer>();		
+		try 
+		{
+			String query = "SELECT idSquadra FROM Squadra WHERE Utente_idUtente = " + uid;
+			ResultSet resultSet = statement.executeQuery(query);
+			while(resultSet.next()) {
+				resArray.add(resultSet.getInt("idSquadra"));
+			}
+		} catch(Exception e) {
+			System.err.println("Error: " + e);
+			resArray = null;
+		}
+		return resArray;
+	}
+	
+}
