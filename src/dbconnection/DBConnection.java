@@ -34,7 +34,7 @@ public class DBConnection {
 	
 	public void init(){
 		userInfo.put("user", "root");
-		userInfo.put("password", "");
+		userInfo.put("password", "sdrc");
 		
 		try {
 			// Load the driver. NOT NEEDED in Java 6!
@@ -83,14 +83,14 @@ public class DBConnection {
 	 * Metodo che restituisce gli attaccanti appartenenti ad un certa Squadra
 	 * @param id_team identificatore squadra
 	 * @return 
-	 */ /*
+	 */
 	public ArrayList<Integer> getAttPlayers(int id_team){
 		ArrayList<Integer> resArray = new ArrayList<Integer>();		
 		try 
 		{
 			String query = "SELECT idCalciatore, Cognome, Club FROM Convocazione INNER JOIN Calciatore ON Convocazione.Calciatore_idCalciatore = Calciatore.idCalciatore where Convocazione.Squadra_idSquadra = "+id_team+" AND Calciatore.Ruolo = A";
 			ResultSet resultSet = statement.executeQuery(query);
-			for(int i=0; i)
+		//	for(int i=0; i)
 			while(resultSet.next()) {
 				resArray.add(resultSet.getInt("idSquadra"));
 			}
@@ -99,6 +99,6 @@ public class DBConnection {
 			resArray = null;
 		}
 		return resArray; 
-	}*/
+	}
 	
 }
