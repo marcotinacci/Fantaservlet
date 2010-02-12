@@ -83,7 +83,7 @@ public class DBConnection {
 	 * Metodo che restituisce gli attaccanti appartenenti ad un certa Squadra
 	 * @param id_team identificatore squadra
 	 * @return 
-	 */
+	 */ /*
 	public ArrayList<Integer> getAttPlayers(int id_team){
 		ArrayList<Integer> resArray = new ArrayList<Integer>();		
 		try 
@@ -98,7 +98,7 @@ public class DBConnection {
 			System.err.println("Error: " + e);
 			resArray = null;
 		}
-		return resArray;
-	}
+		return resArray; 
+	}*/
 	
 }
