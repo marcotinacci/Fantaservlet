@@ -20,6 +20,7 @@ public class DBConnection {
 		DBConnection dbc = new DBConnection();
 		dbc.init();
 		System.out.println("Squadre dell'utente 1: "+dbc.getTeams(1));
+		//System.out.println("Attaccanti dell'utente 1: "+dbc.getAttPlayers(1));
 		dbc.destroy();
 	}
 	
@@ -68,6 +69,28 @@ public class DBConnection {
 		{
 			String query = "SELECT idSquadra FROM Squadra WHERE Utente_idUtente = " + uid;
 			ResultSet resultSet = statement.executeQuery(query);
+			while(resultSet.next()) {
+				resArray.add(resultSet.getInt("idSquadra"));
+			}
+		} catch(Exception e) {
+			System.err.println("Error: " + e);
+			resArray = null;
+		}
+		return resArray;
+	}
+	
+	/**
+	 * Metodo che restituisce gli attaccanti appartenenti ad un certa Squadra
+	 * @param id_team identificatore squadra
+	 * @return 
+	 */
+	public ArrayList<Integer> getAttPlayers(int id_team){
+		ArrayList<Integer> resArray = new ArrayList<Integer>();		
+		try 
+		{
+			String query = "SELECT idCalciatore, Cognome, Club FROM Convocazione INNER JOIN Calciatore ON Convocazione.Calciatore_idCalciatore = Calciatore.idCalciatore where Convocazione.Squadra_idSquadra = "+id_team+" AND Calciatore.Ruolo = A";
+			ResultSet resultSet = statement.executeQuery(query);
+			for(int i=0; i)
 			while(resultSet.next()) {
 				resArray.add(resultSet.getInt("idSquadra"));
 			}
