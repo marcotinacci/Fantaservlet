@@ -1,13 +1,12 @@
-/**
- * 
- */
 package dbconnection;
 
+import entities.*;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -19,7 +18,8 @@ public class DBConnection {
 	public static void main(String args[]){
 		DBConnection dbc = new DBConnection();
 		dbc.init();
-		System.out.println("Squadre dell'utente 1: "+dbc.getTeams(1));
+		System.out.println("utenti: "+dbc.getUsers());
+		//System.out.println("Squadre dell'utente 1: "+dbc.getTeams(1));
 		//System.out.println("Attaccanti dell'utente 1: "+dbc.getAttPlayers(1));
 		dbc.destroy();
 	}
@@ -41,7 +41,7 @@ public class DBConnection {
 			Class.forName(driver);
 			
 			// Establish network connection to database.
-			connection = DriverManager.getConnection(url, userInfo);
+			connection = DriverManager.getConnection(url,userInfo);
 			
 			// Create a statement for executing queries.
 			statement = connection.createStatement();
@@ -101,4 +101,23 @@ public class DBConnection {
 		return resArray; 
 	}
 	
+	/**
+	 * metodo che recupera i dati degli utenti dal database
+	 * @return lista utenti
+	 */
+	public List<User> getUsers(){
+		List<User> lu = new ArrayList<User>();
+		try{
+			String query = "SELECT idUtente, Nome, Password, Admin FROM Utente";
+			ResultSet res = statement.executeQuery(query);
+			while (res.next()){
+				lu.add(new User(res.getString("Nome"),
+					res.getString("Password"), res.getBoolean("Admin")));
+			}
+		}catch(Exception e){
+			System.err.println("Error: " + e);
+			lu = null;			
+		}
+		return lu;
+	}
 }
