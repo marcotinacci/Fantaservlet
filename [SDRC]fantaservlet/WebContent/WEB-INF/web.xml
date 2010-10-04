@@ -1,6 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" version="3.0">
   <servlet>
+    <servlet-name>test_printpdf</servlet-name>
+    <servlet-class>servlets.PrintPDF</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>test_printpdf</servlet-name>
+    <url-pattern>/print</url-pattern>
+  </servlet-mapping>
+  
+  <servlet>
     <description></description>
     <display-name>adduser</display-name>
     <servlet-name>adduser</servlet-name>
@@ -53,7 +63,7 @@
     <display-name>importreports</display-name>
     <servlet-name>importreports</servlet-name>
     <jsp-file>/importreports.jsp</jsp-file>
-  </servlet>  
+  </servlet>
   <servlet-mapping>
     <servlet-name>adduser</servlet-name>
     <url-pattern>/adduser</url-pattern>
@@ -81,7 +91,7 @@
   <servlet-mapping>
     <servlet-name>closeday</servlet-name>
     <url-pattern>/closeday</url-pattern>
-  </servlet-mapping>  
+  </servlet-mapping>
   <servlet-mapping>
     <servlet-name>addreport</servlet-name>
     <url-pattern>/addreport</url-pattern>
@@ -89,7 +99,7 @@
   <servlet-mapping>
     <servlet-name>importreports</servlet-name>
     <url-pattern>/importreports</url-pattern>
-  </servlet-mapping>  
+  </servlet-mapping>
   <welcome-file-list>
     <welcome-file>index.jsp</welcome-file>
   </welcome-file-list>

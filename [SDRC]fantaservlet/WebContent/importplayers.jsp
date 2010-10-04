@@ -52,7 +52,6 @@ if(ServletFileUpload.isMultipartContent(request)) {
 	}
 	dbc.destroy();
 }
-// TODO importplayers servlet, senza .jsp
 %>
 
 <form name="importplayers_form" action="importplayers.jsp" method="POST" enctype="multipart/form-data">
