@@ -94,5 +94,4 @@ public class GroupHireEntity {
 			getDef().length == 8 &&
 			getGolkeep().length == 3;
 	}
-	
 }

@@ -4,13 +4,14 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>Fantaservlet : homepage</title>
+<title>Fantaservlet : user</title>
 </head>
 <body>
-<h1>Home page</h1>
-<p>Pagina provvisoria</p>
-<a href="adminmenu.jsp">menu amministrazione</a>
-<br/>
-<a href="usermenu.jsp">menu utente</a>
+<h1>User Menu</h1>
+<ul>
+<li><a href="formationhandling.jsp">Gestisci le formazioni giornaliere</a></li>
+<li><a href="viewresults.jsp">Controlla i risultati</a></li>
+<li><a href="printpdf.jsp">Stampa PDF</a></li>
+</ul>
 </body>
 </html>

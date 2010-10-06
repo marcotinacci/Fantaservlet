@@ -13,7 +13,6 @@ DROP TABLE IF EXISTS `fsdb`.`Campionato` ;
 CREATE  TABLE IF NOT EXISTS `fsdb`.`Campionato` (
   `idCampionato` INT NOT NULL AUTO_INCREMENT ,
   `Nome` VARCHAR(45) NOT NULL ,
-  `Definito` TINYINT(1) NOT NULL DEFAULT 0 ,
   PRIMARY KEY (`idCampionato`) ,
   UNIQUE INDEX `u_Nome` (`Nome` ASC) )
 ENGINE = InnoDB;
@@ -154,6 +153,7 @@ CREATE  TABLE IF NOT EXISTS `fsdb`.`Convocazione` (
   PRIMARY KEY (`idConvocazione`) ,
   INDEX `fk_Convocazione_Squadra1` (`Squadra_idSquadra` ASC) ,
   INDEX `fk_Convocazione_Calciatore1` (`Calciatore_idCalciatore` ASC) ,
+  UNIQUE INDEX `u_SquadraCalciatore` (`Calciatore_idCalciatore` ASC, `Squadra_idSquadra` ASC) ,
   CONSTRAINT `fk_Convocazione_Squadra1`
     FOREIGN KEY (`Squadra_idSquadra` )
     REFERENCES `fsdb`.`Squadra` (`idSquadra` )
@@ -179,6 +179,7 @@ CREATE  TABLE IF NOT EXISTS `fsdb`.`Schieramento` (
   PRIMARY KEY (`idSchieramento`) ,
   INDEX `fk_Schieramento_Convocazione1` (`Convocazione_idConvocazione` ASC) ,
   INDEX `fk_Schieramento_Giornata1` (`Giornata_idGiornata` ASC) ,
+  UNIQUE INDEX `u_ConvocazioneGiornata` (`Convocazione_idConvocazione` ASC, `Giornata_idGiornata` ASC) ,
   CONSTRAINT `fk_Schieramento_Convocazione1`
     FOREIGN KEY (`Convocazione_idConvocazione` )
     REFERENCES `fsdb`.`Convocazione` (`idConvocazione` )
@@ -223,24 +224,6 @@ CREATE  TABLE IF NOT EXISTS `fsdb`.`Partita` (
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
-
--- -----------------------------------------------------
--- Placeholder table for view `fsdb`.`Convocabili`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `fsdb`.`Convocabili` (`idCalciatore` INT, `Nome` INT, `Ruolo` INT, `Squadra` INT);
-
--- -----------------------------------------------------
--- View `fsdb`.`Convocabili`
--- -----------------------------------------------------
-DROP VIEW IF EXISTS `fsdb`.`Convocabili` ;
-DROP TABLE IF EXISTS `fsdb`.`Convocabili`;
-CREATE  OR REPLACE VIEW `fsdb`.`Convocabili` AS
-SELECT * FROM `Calciatore` WHERE `idCalciatore` NOT IN
-(SELECT `idCalciatore` FROM `Calciatore`
-  INNER JOIN `Convocazione` ON `idCalciatore` = `Calciatore_idCalciatore` 
-  INNER JOIN `Squadra` ON `Squadra_idSquadra` = `idSquadra`
-WHERE `Campionato_idCampionato` = @champ)
-;
 
 
 SET SQL_MODE=@OLD_SQL_MODE;
