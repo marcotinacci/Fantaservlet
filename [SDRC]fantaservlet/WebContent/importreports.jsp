@@ -41,9 +41,9 @@ if (ServletFileUpload.isMultipartContent(request))
 	// TODO problemi inizializzazione	
 	Integer did = -1;
 	ServletFileUpload upload = new ServletFileUpload(new DiskFileItemFactory());
-	List items=upload.parseRequest(request);
-	for(Iterator it = items.iterator();it.hasNext();) {
-	    FileItem item=(FileItem)it.next();
+	List<FileItem> items=upload.parseRequest(request);
+	for(Iterator<FileItem> it = items.iterator();it.hasNext();) {
+	    FileItem item=it.next();
 	    if(item.isFormField()) {
 	        // leggi l'id del giorno
 	        did = Integer.parseInt(item.getString());

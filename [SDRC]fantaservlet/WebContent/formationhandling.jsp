@@ -148,7 +148,7 @@ if(todoParam != null){
 					// recupera i dati dei calciatori nella formazione
 					List<PlayerEntity> players = dbc.getPlayersById(formationList);
 %>
-	<p>La formazione della squadra <b><%=team.getName()%></b> &egrave; la seguente:
+	<p>La formazione della squadra <b><%=team.getName()%></b> &egrave; la seguente:</p>
 	<ul>
 		<li><b>Modulo:</b>
 			<%=formation.getDef().length %> - 
@@ -163,7 +163,6 @@ if(todoParam != null){
 		<li><b>Portiere:</b>
 			<%= Style.showPlayersList(GenericUtilities.getPlayersListByRule(players,'P'),false) %>		
 	</ul>
-	</p>
 <%
 				}
 				
