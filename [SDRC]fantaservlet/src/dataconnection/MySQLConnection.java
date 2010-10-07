@@ -7,6 +7,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.sql.PreparedStatement;
@@ -85,31 +86,6 @@ public class MySQLConnection {
 		return resArray;
 	}
 	
-	// TODO serve il metodo getAttPlayers?
-	/*
-	/**
-	 * Metodo che restituisce gli attaccanti appartenenti ad un certa Squadra
-	 * @param id_team identificatore squadra
-	 * @return lista di identificatori dei calciatori
-	 *
-	public ArrayList<Integer> getAttPlayers(int id_team){
-		ArrayList<Integer> resArray = new ArrayList<Integer>();		
-		try 
-		{
-			String query = "SELECT idCalciatore, Cognome, Club FROM Convocazione " +
-				"INNER JOIN Calciatore ON Convocazione.Calciatore_idCalciatore = Calciatore.idCalciatore " +
-				"WHERE Convocazione.Squadra_idSquadra = "+id_team+" AND Calciatore.Ruolo = A";
-			ResultSet resultSet = preparedStatement.executeQuery(query);
-			while(resultSet.next()) {
-				resArray.add(resultSet.getInt("idCalciatore"));
-			}
-		} catch(Exception e) {
-			System.err.println("Error: " + e);
-			resArray = null;
-		}
-		return resArray; 
-	}
-	*/
 	/**
 	 * metodo che recupera i dati degli utenti dal database
 	 * @return lista utenti
@@ -799,6 +775,140 @@ public class MySQLConnection {
 		}
 		// esegui l'inserimento dello schieramento
 		preparedStatement.executeUpdate();
+	}
+	
+	/**
+	 * metodo che la lista di calciatori corrispondenti agli id forniti
+	 * @param idList lista di id dei calciatori
+	 * @return lista di calciatori
+	 * @throws SQLException sollevata quando la query fallisce
+	 */
+	public List<PlayerEntity> getPlayersById(List<Integer> idList) throws SQLException {
+		// se non sono presenti id ritorna una lista vuota
+		if(idList.isEmpty()) return new ArrayList<PlayerEntity>();
+		// query di recupero dei voti
+		StringBuffer query = new StringBuffer("SELECT idCalciatore, Nome, Ruolo, Squadra " +
+			"FROM Calciatore WHERE idCalciatore IN (");
+		// inserisci i placeholders
+		for(int i = 0; i < idList.size()-1; i++){
+			query.append("?,");
+		}
+		query.append("?)");
+		preparedStatement = connection.prepareStatement(query.toString());
+		// inserisci i valori nei placeholders
+		for(int i=0; i < idList.size(); i++){
+			preparedStatement.setInt(i+1, idList.get(i));
+		}
+		// esegui la query
+		ResultSet res = preparedStatement.executeQuery();
+		List<PlayerEntity> players = new ArrayList<PlayerEntity>();
+		while(res.next()){
+			// id nome ruolo squadra
+			players.add(new PlayerEntity(
+				res.getInt("idCalciatore"),
+				res.getString("Nome"),
+				res.getString("Ruolo").charAt(0),
+				res.getString("Squadra")
+				));
+		}
+		return players;
 	}		
+
+	/**
+	 * metodo che ricava il campionato a cui appartiene la squadra specificata
+	 * @param tid id della squadra
+	 * @return campionato a cui appartiene la squadra
+	 * @throws SQLException sollevata quando la query fallisce
+	 */
+	public ChampionshipEntity getChampionshipOfTeam(Integer tid) throws SQLException{
+		preparedStatement = connection.prepareStatement("SELECT C.idCampionato, C.Nome " +
+			"FROM Campionato C INNER JOIN Squadra S ON S.Campionato_idCampionato = C.idCampionato " +
+			"WHERE S.idSquadra = ?");
+		preparedStatement.setInt(1, tid);
+		ResultSet res = preparedStatement.executeQuery();
+		if(!res.next()){
+			// se non ci sono campionati corrispondenti
+			// TODO lanciare eccezione (non SQL)
+		}
+		return new ChampionshipEntity(res.getInt("idCampionato"),res.getString("Nome"));		
+	}
+	
+	/**
+	 * metodo che ricava il campionato a cui appartiene la giornata specificata
+	 * @param did id della squadra
+	 * @return campionato a cui appartiene la giornata
+	 * @throws SQLException sollevata quando la query fallisce
+	 */
+	public ChampionshipEntity getChampionshipOfDay(Integer did) throws SQLException{
+		preparedStatement = connection.prepareStatement("SELECT C.idCampionato, C.Nome " +
+			"FROM Campionato C INNER JOIN Giornata G ON G.Campionato_idCampionato = C.idCampionato " +
+			"WHERE G.idGiornata = ?");
+		preparedStatement.setInt(1, did);
+		ResultSet res = preparedStatement.executeQuery();
+		if(!res.next()){
+			// se non ci sono campionati corrispondenti
+			// TODO lanciare eccezione (non SQL)
+		}
+		return new ChampionshipEntity(res.getInt("idCampionato"),res.getString("Nome"));		
+	}	
+	
+	/**
+	 * metodo che modifica una formazione giˆ presente nel database, i record del
+	 * vecchio schieramento vengono rimossi e poi vengono inseriti quelli nuovi
+	 * @param newFormation formazione modificata
+	 * @param oldFormation vecchia formazione
+	 * @throws SQLException sollevata quando la query fallisce
+	 */
+	public void updateFormation(FormationEntity newFormation, FormationEntity oldFormation) 
+		throws SQLException{
+		// prima query: recupera gli id degli schieramenti cancellati
+		String query1 = "SELECT idSchieramento " +
+			"FROM Schieramento INNER JOIN Convocazione ON idConvocazione = Convocazione_idConvocazione " +
+			"WHERE Squadra_idSquadra = "+oldFormation.getTeam()+" AND Giornata_idGiornata = "+oldFormation.getDay();
+		ResultSet res = preparedStatement.executeQuery(query1);
+		
+		// seconda query: cancella gli schieramenti
+		if(res.next()){
+			StringBuffer query2 = new StringBuffer("" +
+				"DELETE FROM Schieramento WHERE idSchieramento IN ("+res.getInt("idSchieramento"));
+			while(res.next()){
+				query2.append(","+res.getInt("idSchieramento"));
+			}
+			query2.append(")");
+			preparedStatement.executeUpdate(query2.toString());
+		}
+		
+		// terza query: inserisci i nuovi schieramenti
+		insertFormation(newFormation);
+	}
+	
+	/**
+	 * metodo che recupera i dati delle giornate partendo dagli id
+	 * @param ids id delle giornate
+	 * @return lista delle giornate
+	 * @throws SQLException sollevata quando la query fallisce
+	 */
+	public List<DayEntity> getDaysById(List<Integer> ids) throws SQLException{
+		// se non ci sono id torna una lista vuota
+		if(ids.size() == 0) return new ArrayList<DayEntity>();
+		
+		Iterator<Integer> it = ids.iterator();
+		StringBuffer query = new StringBuffer(
+			"SELECT idGiornata, Campionato_idCampionato, Data, Chiusa " +
+			"FROM Giornata WHERE idGiornata IN ("+(Integer)it.next());
+		while(it.hasNext()) query.append(","+((Integer)it.next()));
+		query.append(")");
+		
+		// esegui query
+		ResultSet res = preparedStatement.executeQuery(query.toString());
+		
+		// lista delle giornate
+		List<DayEntity> days = new ArrayList<DayEntity>();
+		while(res.next()){
+			days.add(new DayEntity(res.getInt("idGiornata"),res.getInt("Campionato_idCampionato"),
+				res.getDate("Data"),res.getBoolean("Chiusa")));
+		}
+		return days;
+	}
 	
 }
