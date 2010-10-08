@@ -2,6 +2,7 @@ SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='TRADITIONAL';
 
+DROP SCHEMA IF EXISTS `fsdb` ;
 CREATE SCHEMA IF NOT EXISTS `fsdb` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci ;
 USE `fsdb`;
 
@@ -70,6 +71,7 @@ CREATE  TABLE IF NOT EXISTS `fsdb`.`Giornata` (
   `Campionato_idCampionato` INT NOT NULL ,
   `Data` DATE NOT NULL ,
   `Chiusa` TINYINT(1) NOT NULL DEFAULT 0 ,
+  `Valutata` TINYINT(1) NOT NULL DEFAULT 0 ,
   PRIMARY KEY (`idGiornata`) ,
   INDEX `fk_Giornata_Campionato` (`Campionato_idCampionato` ASC) ,
   CONSTRAINT `fk_Giornata_Campionato`

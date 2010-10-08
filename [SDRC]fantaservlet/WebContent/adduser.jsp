@@ -34,7 +34,7 @@ if(user.isComplete()){
 	}
 	// stampa eventuali errori
 	String alert = (nameAvailable?"":"Nome non disponibile")+
-		(confirmPassword?"":"La password non corrisponde alla conferma");
+		(confirmPassword ? "" : "La password non corrisponde alla conferma");
 	if(!alert.equals("")){
 		out.println(Style.alertMessage(alert));
 	}	

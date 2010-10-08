@@ -9,6 +9,7 @@ import java.util.List;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import dataconnection.MySQLConnection;
 import entities.PlayerEntity;
@@ -51,31 +52,38 @@ public class ReadXLS implements IReadFile {
 					row.getCell(2).getStringCellValue());
 
 				// gol segnati (1)
-				for(int i = (int)row.getCell(5).getNumericCellValue(); i > 0; i--){
+				for(int i = row.getCell(5).getCellType() == Cell.CELL_TYPE_NUMERIC ? (int)row.getCell(5).getNumericCellValue() : 0
+						; i > 0; i--){
 					lr.add(new ReportEntity(1, null, pid));
 				}
 				// rigore sbagliato (2)
-				for(int i = (int)row.getCell(13).getNumericCellValue(); i > 0; i--){
+				for(int i = row.getCell(13).getCellType() == Cell.CELL_TYPE_NUMERIC ? (int)row.getCell(13).getNumericCellValue() : 0
+						; i > 0; i--){
 					lr.add(new ReportEntity(2, null, pid));
 				}
 				// rigore parato (3)
-				for(int i = (int)row.getCell(12).getNumericCellValue(); i > 0; i--){
+				for(int i = row.getCell(12).getCellType() == Cell.CELL_TYPE_NUMERIC ? (int)row.getCell(12).getNumericCellValue() : 0
+						; i > 0; i--){
 					lr.add(new ReportEntity(3, null, pid));
 				}				
 				// autogol (4)
-				for(int i = (int)row.getCell(14).getNumericCellValue(); i > 0; i--){
+				for(int i = row.getCell(14).getCellType() == Cell.CELL_TYPE_NUMERIC ? (int)row.getCell(14).getNumericCellValue() : 0
+						; i > 0; i--){
 					lr.add(new ReportEntity(4, null, pid));
 				}
 				// gol subito (5)
-				for(int i = (int)row.getCell(6).getNumericCellValue(); i > 0; i--){
+				for(int i = row.getCell(6).getCellType() == Cell.CELL_TYPE_NUMERIC ? (int)row.getCell(6).getNumericCellValue() : 0
+						; i > 0; i--){
 					lr.add(new ReportEntity(5, null, pid));
 				}				
 				// espulsione (6)
-				for(int i = (int)row.getCell(11).getNumericCellValue(); i > 0; i--){
+				for(int i = row.getCell(11).getCellType() == Cell.CELL_TYPE_NUMERIC ? (int)row.getCell(11).getNumericCellValue() : 0
+						; i > 0; i--){
 					lr.add(new ReportEntity(6, null, pid));
 				}
 				// ammonizione (7)
-				for(int i = (int)row.getCell(10).getNumericCellValue(); i > 0; i--){
+				for(int i = row.getCell(10).getCellType() == Cell.CELL_TYPE_NUMERIC ? (int)row.getCell(10).getNumericCellValue() : 0
+						; i > 0; i--){
 					lr.add(new ReportEntity(7, null, pid));
 				}
 			}	

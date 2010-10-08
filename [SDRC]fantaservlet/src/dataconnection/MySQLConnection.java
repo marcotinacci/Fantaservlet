@@ -1,6 +1,7 @@
 package dataconnection;
 
 import entities.*;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -12,9 +13,9 @@ import java.util.List;
 import java.util.Properties;
 import java.sql.PreparedStatement;
 
+import utils.Pair;
+
 // TODO modificare i nomi dei metodi in lowerChamel (nomeMetodo)
-// TODO modificare le query col prepared statement
-// TODO modificare le query con le eccezioni SQL tirate all'esterno (e gestirle dal chiamante con alert)
 
 /**
  * @author Michael
@@ -89,19 +90,16 @@ public class MySQLConnection {
 	/**
 	 * metodo che recupera i dati degli utenti dal database
 	 * @return lista utenti
+	 * @throws SQLException sollevata quando la query fallisce
 	 */
-	public List<UserEntity> getUsers(){
+	public List<UserEntity> getUsers() throws SQLException{
 		List<UserEntity> lu = new ArrayList<UserEntity>();
-		try{
-			String query = "SELECT idUtente, Nome, Password, Admin FROM Utente";
-			ResultSet res = preparedStatement.executeQuery(query);
-			while (res.next()){
-				lu.add(new UserEntity(res.getString("Nome"),
-					res.getString("Password"), res.getBoolean("Admin")));
-			}
-		}catch(Exception e){
-			System.err.println("Error: " + e);
-			lu = null;			
+		preparedStatement = connection.prepareStatement(
+			"SELECT idUtente, Nome, Password, Admin FROM Utente");
+		ResultSet res = preparedStatement.executeQuery();
+		while (res.next()){
+			lu.add(new UserEntity(res.getString("Nome"),
+				res.getString("Password"), res.getBoolean("Admin")));
 		}
 		return lu;
 	}
@@ -109,15 +107,15 @@ public class MySQLConnection {
 	/**
 	 * metodo che inserisce i dati di un utente nel database se il nome non è già presente
 	 * @param user utente da inserire
+	 * @throws SQLException sollevata quando la query fallisce
 	 */
-	public void InsertUser(UserEntity user){
-		try{
-			String query = "INSERT INTO Utente(Nome,Password,Admin) VALUES ('"+user.getName()+"','"+
-				user.getPassword()+"',"+user.isAdmin()+")";
-			preparedStatement.executeUpdate(query);
-		}catch(Exception e){
-			System.err.println("Error: " + e);
-		}
+	public void InsertUser(UserEntity user) throws SQLException{
+		preparedStatement = connection.prepareStatement(
+			"INSERT INTO Utente(Nome,Password,Admin) VALUES (?,?,?)");
+		preparedStatement.setString(1, user.getName());
+		preparedStatement.setString(2, user.getPassword());
+		preparedStatement.setBoolean(3, user.isAdmin());		
+		preparedStatement.executeUpdate();
 	}
 
 	/**
@@ -246,14 +244,15 @@ public class MySQLConnection {
 		List<DayEntity> lodoc = new ArrayList<DayEntity>();
 		// query di selezione
 		preparedStatement = connection.prepareStatement(
-			"SELECT idGiornata, Data " +
+			"SELECT idGiornata, Data, Valutata " +
 			"FROM Giornata WHERE Chiusa = 0 AND Campionato_idCampionato = ?");
 		// inserimento id campionato
 		preparedStatement.setInt(1, idChamp);
 		// esegui la query
 		ResultSet res = preparedStatement.executeQuery();
 		while (res.next()){
-			lodoc.add(new DayEntity(res.getInt("idGiornata"),idChamp,res.getDate("Data"),false));
+			lodoc.add(new DayEntity(res.getInt("idGiornata"),idChamp,res.getDate("Data"),
+				false, res.getBoolean("Valutata")));
 		}
 		return lodoc;
 	}
@@ -391,21 +390,23 @@ public class MySQLConnection {
 		// controlla se ci sono giornate da inserire
 		if(lde.size() > 0){
 			StringBuffer query = new StringBuffer(
-				"INSERT INTO Giornata(Data, Chiusa, Campionato_idCampionato) VALUES (?,?,?)");
+				"INSERT INTO Giornata(Data, Chiusa, Valutata, Campionato_idCampionato) VALUES (?,?,?,?)");
 			// inserisci placeholders
 			for(int i=0; i < lde.size()-1; i++){
-				query.append(",(?,?,?)");
+				query.append(",(?,?,?,?)");
 			}
 			preparedStatement = connection.prepareStatement(query.toString());
 			// inserisci i valori nei placeholders
 			for(int i=0; i < lde.size(); i++){
 				// data
 				// TODO util.data -> long -> sql.data, gestire tutto come sql.data?
-				preparedStatement.setDate(i*3+1, new java.sql.Date(lde.get(i).getDate().getTime()));
+				preparedStatement.setDate(i*4+1, new java.sql.Date(lde.get(i).getDate().getTime()));
 				// chiusura
-				preparedStatement.setBoolean(i*3+2, lde.get(i).isClose());
+				preparedStatement.setBoolean(i*4+2, lde.get(i).isClose());
+				// valutazione
+				preparedStatement.setBoolean(i*4+3, lde.get(i).isEvaluated());				
 				// id campionato
-				preparedStatement.setInt(i*3+3, lde.get(i).getIdChampionship());				
+				preparedStatement.setInt(i*4+4, lde.get(i).getIdChampionship());				
 			}
 			// esegui la query
 			preparedStatement.executeUpdate();			
@@ -450,7 +451,9 @@ public class MySQLConnection {
 	public List<DayEntity> getDayOfChampionship(Integer idChamp) throws SQLException {
 		List<DayEntity> lde = new ArrayList<DayEntity>();
 		// query di recupero delle date
-		StringBuffer query = new StringBuffer("SELECT * FROM Giornata WHERE Campionato_idCampionato = ?");
+		StringBuffer query = new StringBuffer(
+			"SELECT idGiornata, Campionato_idCampionato, Data, Chiusa, Valutata " +
+			"FROM Giornata WHERE Campionato_idCampionato = ?");
 		preparedStatement = connection.prepareStatement(query.toString());
 		// inserisci l'id del campionato nella query
 		preparedStatement.setInt(1, idChamp);
@@ -459,7 +462,7 @@ public class MySQLConnection {
 		// trasferisci i dati su lista
 		while(res.next()){
 			lde.add(new DayEntity(res.getInt("idGiornata"),res.getInt("Campionato_idCampionato"),
-				res.getDate("Data"), res.getBoolean("Chiusa")));
+				res.getDate("Data"), res.getBoolean("Chiusa"), res.getBoolean("Valutata")));
 		}
 		return lde;
 	}		
@@ -494,6 +497,21 @@ public class MySQLConnection {
 		// query di update della data
 		preparedStatement = connection.prepareStatement(
 			"UPDATE Giornata SET Chiusa = 1 WHERE idGiornata = ?");
+		// inserisci l'id della giornata nella query
+		preparedStatement.setInt(1, dayId);
+		// esegui la query
+		preparedStatement.executeUpdate();
+	}
+	
+	/**
+	 * metodo che segna una giornata come valutata
+	 * @param dayId identificativo giornata da valutare
+	 * @throws SQLException sollevata quando la query fallisce
+	 */
+	public void updateEvaluateDay(Integer dayId) throws SQLException{
+		// query di update della data
+		preparedStatement = connection.prepareStatement(
+			"UPDATE Giornata SET Valutata = 1 WHERE idGiornata = ?");
 		// inserisci l'id della giornata nella query
 		preparedStatement.setInt(1, dayId);
 		// esegui la query
@@ -894,7 +912,7 @@ public class MySQLConnection {
 		
 		Iterator<Integer> it = ids.iterator();
 		StringBuffer query = new StringBuffer(
-			"SELECT idGiornata, Campionato_idCampionato, Data, Chiusa " +
+			"SELECT idGiornata, Campionato_idCampionato, Data, Chiusa, Valutata " +
 			"FROM Giornata WHERE idGiornata IN ("+(Integer)it.next());
 		while(it.hasNext()) query.append(","+((Integer)it.next()));
 		query.append(")");
@@ -906,9 +924,102 @@ public class MySQLConnection {
 		List<DayEntity> days = new ArrayList<DayEntity>();
 		while(res.next()){
 			days.add(new DayEntity(res.getInt("idGiornata"),res.getInt("Campionato_idCampionato"),
-				res.getDate("Data"),res.getBoolean("Chiusa")));
+				res.getDate("Data"),res.getBoolean("Chiusa"),res.getBoolean("Valutata")));
 		}
 		return days;
+	}
+	
+	/**
+	 * metodo che ritorna i campionati a cui partecipa l'utente
+	 * @param uid id utente
+	 * @return lista di campionati
+	 * @throws SQLException sollevata quando la query fallisce
+	 */
+	public List<ChampionshipEntity> getChampionshipOfUser(Integer uid) throws SQLException {
+		String query = "SELECT DISTINCT C.idCampionato, C.Nome " +
+			"FROM Squadra INNER JOIN Campionato C ON idCampionato = Campionato_idCampionato " +
+			"WHERE Utente_idUtente = ?";
+		preparedStatement = connection.prepareStatement(query);
+		preparedStatement.setInt(1, uid);
+		ResultSet res = preparedStatement.executeQuery();
+		// crea la lista dei campionati
+		List<ChampionshipEntity> lc = new ArrayList<ChampionshipEntity>();
+		while(res.next())
+			lc.add(new ChampionshipEntity(res.getInt("idCampionato"),res.getString("Nome")));
+		return lc;
+	}
+	
+	/**
+	 * metodo che ritorna le squadre che si affrontano in una giornata di campionato
+	 * @param did id della giornata
+	 * @return lista di coppie di squadre 
+	 * @throws SQLException sollevata quando la query fallisce
+	 */
+	public List<Pair<TeamEntity, TeamEntity>> getMatchesOfDay(Integer did) throws SQLException{
+		// la query interna effettua una join tra squadra e partita per ricavare i dati della prima squadra
+		// mentre quella esterna fa la join tra il primo risultato e nuovamente con squadra per
+		// ricavare i dati della seconda
+		String query = 
+			"SELECT " +
+				"T.Squadra_idSquadra1 AS idSquadra1, " +
+				"T.Squadra_idSquadra2 AS idSquadra2, " +
+				"T.Nome AS nomeSquadra1, " +
+				"S2.Nome AS nomeSquadra2," +
+				"T.Utente_idUtente AS utenteSquadra1, " +
+				"S2.Utente_idUtente AS utenteSquadra2, " +
+				"Campionato_idCampionato AS idCampionato " +
+			"FROM (" +
+				"SELECT P.Squadra_idSquadra1, P.Squadra_idSquadra2, S1.Nome, S1.Utente_idUtente " +
+				"FROM Partita P INNER JOIN Squadra S1 ON P.Squadra_idSquadra1 = S1.idSquadra " +
+				"WHERE P.Giornata_idGiornata = ?) T " +
+			"INNER JOIN Squadra S2 ON T.Squadra_idSquadra2 = S2.idSquadra";
+		preparedStatement = connection.prepareStatement(query);
+		preparedStatement.setInt(1, did);
+		ResultSet res = preparedStatement.executeQuery();
+		// crea la lista delle coppie di squadre
+		List<Pair<TeamEntity, TeamEntity>> lt = new ArrayList<Pair<TeamEntity,TeamEntity>>();
+		while(res.next()){
+			lt.add(new Pair<TeamEntity, TeamEntity>(
+				new TeamEntity(res.getInt("idSquadra1"),res.getString("nomeSquadra1"),
+					res.getInt("idCampionato"),res.getInt("utenteSquadra1")), 
+				new TeamEntity(res.getInt("idSquadra2"),res.getString("nomeSquadra2"),
+					res.getInt("idCampionato"),res.getInt("utenteSquadra2"))
+			));
+		}
+		return lt;
+	}
+	
+	/**
+	 * metodo che restituisce il numero di gol della squadra specificando la giornata
+	 * @param tid id della squadra
+	 * @param did id della giornata
+	 * @return numero di gol
+	 * @throws SQLException sollevata quando la query fallisce
+	 */
+	public Integer getGolOfTeamInDay(Integer tid, Integer did) throws SQLException{
+		String query = 
+			"SELECT " +
+				"COUNT(*) AS numeroGol " +
+			"FROM " +
+				"Pagella P INNER JOIN " +
+				"Voto V ON Voto_idVoto = V.idVoto INNER JOIN " +
+				"Calciatore CA ON P.Calciatore_idCalciatore = CA.idCalciatore " +
+				"INNER JOIN Convocazione CO ON CO.Calciatore_idCalciatore = CA.idCalciatore " +
+			"WHERE " +
+				"V.Azione = ? AND " +
+				"CO.Squadra_idSquadra = ? " +
+				"AND P.Giornata_idGiornata = ?";
+		preparedStatement = connection.prepareStatement(query);
+		// inserisci tipo di azione
+		preparedStatement.setString(1, "gol segnato");
+		// inserisci squadra
+		preparedStatement.setInt(2, tid);
+		// inserisci giornata
+		preparedStatement.setInt(3, did);		
+		// esegui query
+		ResultSet res = preparedStatement.executeQuery();
+		res.next();
+		return res.getInt("numeroGol");
 	}
 	
 }

@@ -1,5 +1,6 @@
 package entities;
 
+import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.List;
 import utils.GenericUtilities;
@@ -150,11 +151,12 @@ public class UserEntity {
 	/**
 	 * Controllo assenza del nome nel database
 	 * @return vero se il nome non è presente
+	 * @throws SQLException sollevata quando la query fallisce
 	 */
-	public boolean isAvailableName(){
+	public boolean isAvailableName() throws SQLException {
 		// TODO passaggio connessione a database dall'esterno
 		MySQLConnection dbc = new MySQLConnection();
-		dbc.init();		
+		dbc.init();
 		List<UserEntity> lu = dbc.getUsers();
 		dbc.destroy();
 		for(Iterator<UserEntity> it = lu.listIterator(); it.hasNext();){

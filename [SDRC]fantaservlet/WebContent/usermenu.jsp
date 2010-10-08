@@ -10,7 +10,7 @@
 <h1>User Menu</h1>
 <ul>
 <li><a href="formationhandling.jsp">Gestisci le formazioni giornaliere</a></li>
-<li><a href="viewresults.jsp">Controlla i risultati</a></li>
+<li><a href="showresults.jsp">Controlla i risultati</a></li>
 <li><a href="printpdf.jsp">Stampa PDF</a></li>
 </ul>
 </body>

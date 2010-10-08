@@ -9,34 +9,25 @@ public class DayEntity {
 	private Integer idChampionship;
 	private Date date;
 	private Boolean close = false;
-	
-	public DayEntity(){
-		date = null;
-	}
-	
-	public DayEntity(Integer idChampionship, Date date) {
-		this.idChampionship = idChampionship;
-		this.date = date;
-	}	
-	
-	public DayEntity(Integer id, Integer idChampionship, Date date) {
-		this.id = id;
-		this.idChampionship = idChampionship;
-		this.date = date;
-	}
-	
-	public DayEntity(Integer idChampionship, Date date, Boolean close) {
-		this.idChampionship = idChampionship;
-		this.date = date;
-		this.close = close;
-	}		
+	private Boolean evaluated = false;
 
-	public DayEntity(Integer id, Integer idChampionship, Date date, Boolean close) {
+	public DayEntity(){
+	}
+	
+	public DayEntity(Integer idChampionship, Date date, Boolean close, Boolean evaluated) {
+		this.idChampionship = idChampionship;
+		this.date = date;
+		this.close = close;
+		this.evaluated = evaluated;
+	}			
+	
+	public DayEntity(Integer id, Integer idChampionship, Date date, Boolean close, Boolean evaluated) {
 		this.id = id;
 		this.idChampionship = idChampionship;
 		this.date = date;
 		this.close = close;
-	}	
+		this.evaluated = evaluated;
+	}		
 	
 	public Integer getId() {
 		return id;
@@ -65,6 +56,14 @@ public class DayEntity {
 		this.date = date;
 	}
 
+	public Boolean isEvaluated() {
+		return evaluated;
+	}
+
+	public void setEvaluated(Boolean evaluated) {
+		this.evaluated = evaluated;
+	}	
+	
 	public Boolean isClose() {
 		return close;
 	}

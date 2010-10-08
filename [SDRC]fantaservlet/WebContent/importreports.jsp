@@ -60,13 +60,18 @@ if (ServletFileUpload.isMultipartContent(request))
 		ReportEntity rep = it.next();
 		// aggiorna i dati con il codice della giornata
 		rep.setDay(did);
-		try{
-			// inserisci i record nel database
-			dbc.InsertReport(rep);
-			out.println(Style.successMessage("Voto "+rep+" inserito."));
-		}catch(SQLException sqle){
-			out.println(Style.alertMessage("Errore SQL: "+sqle.getMessage()));
+		// se il report è completo inseriscilo nel database
+		if(rep.isComplete()){
+			try{
+				dbc.InsertReport(rep);
+				out.println(Style.successMessage("Voto "+rep+" inserito."));
+			}catch(SQLException sqle){
+				out.println(Style.alertMessage("Errore SQL: "+sqle.getMessage()));
+			}
+		}else{
+			out.println(Style.alertMessage("Voto "+rep+" non inserito."));				
 		}
+
 	}
 }
 %>

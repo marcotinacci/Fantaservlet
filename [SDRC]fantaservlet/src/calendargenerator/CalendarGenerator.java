@@ -58,6 +58,8 @@ public class CalendarGenerator {
 				// data della giornata incrementata di i settimane
 				new Date(calendar.getStartDate() + weeks),
 				// la giornata viene creata aperta a modifiche
+				false,
+				// la giornata deve essere ancora valutata
 				false
 			);
 			lde.add(d);

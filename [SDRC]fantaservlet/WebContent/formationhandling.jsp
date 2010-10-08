@@ -21,7 +21,7 @@
 <body>
 <h1>Gestione formazioni</h1>
 <form action="formationhandling.jsp" method="get">
-Giornate aperte alle modifiche:
+Scegli la giornata:
 <select name="day">
 <%
 // connessione al database
