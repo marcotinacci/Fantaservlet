@@ -181,10 +181,10 @@ if(todoParam != null){
 	<form action="formationhandling.jsp" method="post">
 		<table border="1">
 		<tr>
-			<td>Difensori</td>
-			<td>Centrocampisti</td>
-			<td>Attaccanti</td>
-			<td>Portieri</td>
+			<th>Difensori</th>
+			<th>Centrocampisti</th>
+			<th>Attaccanti</th>
+			<th>Portieri</th>
 		</tr>
 		<tr>
 	<td valign="top">

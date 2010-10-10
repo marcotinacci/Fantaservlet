@@ -504,14 +504,30 @@ public class MySQLConnection {
 	}
 	
 	/**
-	 * metodo che segna una giornata come valutata
+	 * metodo che riapre la giornata selezionata alle modifiche
+	 * @param dayId identificativo giornata da riaprire
+	 * @throws SQLException sollevata quando la query fallisce
+	 */
+	public void updateOpenDay(Integer dayId) throws SQLException{
+		// query di update della data
+		preparedStatement = connection.prepareStatement(
+			"UPDATE Giornata SET Chiusa = 0 WHERE idGiornata = ?");
+		// inserisci l'id della giornata nella query
+		preparedStatement.setInt(1, dayId);
+		// esegui la query
+		preparedStatement.executeUpdate();
+	}	
+	
+	/**
+	 * metodo che segna una giornata come valutata (se la giornata è aperta viene chiusa)
 	 * @param dayId identificativo giornata da valutare
 	 * @throws SQLException sollevata quando la query fallisce
 	 */
 	public void updateEvaluateDay(Integer dayId) throws SQLException{
 		// query di update della data
+		// se la giornata viene valutata viene automaticamente anche chiusa
 		preparedStatement = connection.prepareStatement(
-			"UPDATE Giornata SET Valutata = 1 WHERE idGiornata = ?");
+			"UPDATE Giornata SET Valutata = 1, Chiusa = 1 WHERE idGiornata = ?");
 		// inserisci l'id della giornata nella query
 		preparedStatement.setInt(1, dayId);
 		// esegui la query
@@ -1022,4 +1038,54 @@ public class MySQLConnection {
 		return res.getInt("numeroGol");
 	}
 	
+	/**
+	 * metodo che restituisce i punteggi delle squadre di un campionato
+	 * @param cid id del campionato
+	 * @return una lista di coppie (squadra,punteggio)
+	 * @throws SQLException sollevata quando la query fallisce
+	 */
+	public List<Pair<TeamEntity,Double>> getChampionshipResults(Integer cid) throws SQLException{
+		// la query recupera tutti i punteggi dei calciatori schierati dalle singole squadre
+		// viene poi fatta la somma per squadra e ritornata a coppie (nomesquadra, sommapunti)
+		// l'unico parametro impostato è l'id del campionato
+		// vengono raccolti solo i punteggi delle partite valutate!
+		String query = 
+			"SELECT " +
+				"S.idSquadra, " +
+				"S.Nome, " +
+				"S.Campionato_idCampionato, " +
+				"S.Utente_idUtente, " +
+				"SUM(V.Punteggio) AS Punti " +
+			"FROM " +
+				"Campionato CH INNER JOIN " +
+				"Squadra S ON CH.idCampionato = S.Campionato_idCampionato INNER JOIN " +
+				"Convocazione C ON S.idSquadra = C.Squadra_idSquadra INNER JOIN " +
+				"Schieramento SC ON C.idConvocazione = SC.Convocazione_idConvocazione INNER JOIN " +
+				"Giornata G ON SC.Giornata_idGiornata = G.idGiornata INNER JOIN " +
+				"Calciatore CA ON CA.idCalciatore = C.Calciatore_idCalciatore INNER JOIN " +
+				"Pagella P ON P.Calciatore_idCalciatore = CA.idCalciatore INNER JOIN " +
+				"Voto V ON V.idVoto = P.Voto_idVoto " +
+			"WHERE " +
+				"CH.idCampionato = ? AND " +
+				"G.Valutata = 1 " +
+			"GROUP BY S.idSquadra " +
+			"ORDER BY Punti DESC, S.Nome ASC";
+		preparedStatement = connection.prepareStatement(query);
+		// inserisci campionato
+		preparedStatement.setInt(1, cid);
+		// esegui query
+		ResultSet res = preparedStatement.executeQuery();
+		List<Pair<TeamEntity,Double>> pointList = new ArrayList<Pair<TeamEntity,Double>>();
+		while(res.next()){
+			// aggiungi la coppia
+			pointList.add(new Pair<TeamEntity, Double>(
+				new TeamEntity(
+					res.getInt("idSquadra"),
+					res.getString("Nome"),
+					res.getInt("Campionato_idCampionato"),
+					res.getInt("Utente_idUtente")), 
+				res.getDouble("Punti")));
+		}
+		return pointList;
+	}	 	
 }

@@ -39,11 +39,13 @@ for(Iterator<ChampionshipEntity> it = lc.iterator(); it.hasNext(); ){
 // se è stato scelto un campionato
 if(request.getParameter("champ") != null){
 // --- stampa le partite --- 
-	Integer cid = Integer.parseInt(request.getParameter("champ"));	
+	Integer cid = Integer.parseInt(request.getParameter("champ"));
+	// stampa titolo della sezione
+	out.println("<h2>Risultati delle partite</h2>");
+	// flag di chiusura campionato
+	Boolean isChampClosed = true;
 	// stringa di stampa delle giornate
 	StringBuffer printDays = new StringBuffer();
-	// stringa di stampa della classifica
-	StringBuffer printLeague = new StringBuffer();
 	// recupera le giornate del campionato
 	List<DayEntity> days = dbc.getDayOfChampionship(cid);
 	// stampa l'inizio della tabella
@@ -62,14 +64,21 @@ if(request.getParameter("champ") != null){
 			// stampa i nomi delle squadre
 			printDays.append("<td>"+pair.getFirst().getName()+" - "+pair.getSecond().getName());
 			// stampa i gol segnati
-			printDays.append("</td><td>"+dbc.getGolOfTeamInDay(pair.getFirst().getId(),day.getId())+
-				" - "+dbc.getGolOfTeamInDay(pair.getSecond().getId(),day.getId())+"</td></tr>");
+			if(day.isEvaluated()){
+				printDays.append("</td><td>"+dbc.getGolOfTeamInDay(pair.getFirst().getId(),day.getId())+
+					" - "+dbc.getGolOfTeamInDay(pair.getSecond().getId(),day.getId())+"</td></tr>");
+			}else{
+				printDays.append("</td><td>n.a.</td></tr>");
+				isChampClosed = false;
+			}
 		}
 	}
-	printDays.append("</table>");	
+	printDays.append("</table>");
 	out.println(printDays.toString());
 // --- stampa la classifica ---
-	// TODO
+	out.println("<h2>Classifica "+ (isChampClosed? "definitiva" : "provvisoria") +"</h2>");
+	out.println(Style.showResults(dbc.getChampionshipResults(cid)));
+	
 }
 
 %>

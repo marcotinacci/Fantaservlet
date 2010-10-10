@@ -13,11 +13,10 @@
 <li><a href="addplayer.jsp">Crea Calciatore</a></li>
 <li><a href="hireplayers.jsp">Convoca Calciatori</a></li>
 <li><a href="computecalendar.jsp">Genera Calendario</a></li>
-<li><a href="closeday.jsp">Chiudi Giornata</a></li>
+<li><a href="dayhandling.jsp">Gestisci le Giornate</a></li>
 <li><a href="addreport.jsp">Assegna Voti</a></li>
 <li><a href="importplayers.jsp">Importa Calciatori</a></li>
 <li><a href="importreports.jsp">Importa Voti</a></li>
-<li><a href="printpdf.jsp">Stampa PDF</a></li>
 </ul>
 </body>
 </html>

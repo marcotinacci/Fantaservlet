@@ -4,7 +4,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import utils.Pair;
+
 import entities.PlayerEntity;
+import entities.TeamEntity;
 
 public class Style {
 	static public String successMessage(String msg){
@@ -118,4 +121,22 @@ public class Style {
 		return selectPlayers(players, name, new ArrayList<Integer>());
 	}
 
+	/**
+	 * metodo che restituisce il codice html della classifica del campionato
+	 * @param list lista di coppie (squadra, punteggio)
+	 * @return codice html della classifica
+	 */
+	static public String showResults(List<Pair<TeamEntity,Double>> list){
+		// TODO gestire pareggi
+		// TODO posizione squadra
+		StringBuffer code = 
+			new StringBuffer("<table border=1><tr><th>Squadra</th><th>Punteggio</th></tr>");
+		for(Iterator<Pair<TeamEntity,Double>> it = list.iterator(); it.hasNext();){
+			Pair<TeamEntity, Double> coppia = it.next();
+			code.append("<tr><td>"+coppia.getFirst().getName()+"</td>");
+			code.append("<td>"+coppia.getSecond()+"</td></tr>");
+		}
+		code.append("</table>");
+		return code.toString();
+	}
 }
