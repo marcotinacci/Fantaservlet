@@ -105,6 +105,24 @@ public class MySQLConnection {
 	}
 	
 	/**
+	 * metodo che recupera i dati di un utente dal nome
+	 * @param name nome utente
+	 * @return i dati dell'utente, null se non esiste il nome
+	 */
+	public UserEntity getUser(String name) throws SQLException{
+		preparedStatement = connection.prepareStatement(
+			"SELECT idUtente, Nome, Password, Admin FROM Utente WHERE Nome = ?");
+		preparedStatement.setString(1, name);
+		ResultSet res = preparedStatement.executeQuery();
+		if(res.next()){
+			return new UserEntity(res.getInt("idUtente"), res.getString("Nome"),
+				res.getString("Password"),res.getBoolean("Admin"));
+		}else{
+			return null;
+		}
+	}
+	
+	/**
 	 * metodo che inserisce i dati di un utente nel database se il nome non è già presente
 	 * @param user utente da inserire
 	 * @throws SQLException sollevata quando la query fallisce

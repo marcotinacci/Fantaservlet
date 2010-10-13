@@ -48,9 +48,9 @@ public class PlayerEntity {
 	}
 
 	public boolean isComplete(){
-		// squadra non necessaria
 		return GenericUtilities.hasValue(getName()) &&
-			GenericUtilities.hasValue(getRule());
+			GenericUtilities.hasValue(getRule()) &&
+			GenericUtilities.hasValue(getTeam());
 	}
 	
 	public boolean isNameAvailable(){

@@ -35,16 +35,20 @@ public class GenericUtilities {
 		return(l != null);
 	}	
 	
-	public static void checkAdminLogged
-		(HttpServletRequest req, HttpServletResponse resp) 
-		throws IOException
+	public static Login checkAdminLogged(HttpServletRequest req, HttpServletResponse resp)
+		throws IOException	
 	{
+		// TODO
+		/*
 		Login log = new Login(req.getSession());
 		if(!log.isLogged()){
 			resp.sendRedirect("login");	
-		}else if(!log.isAdmin()){
+		}else if(!log.getUser().isAdmin()){
 			resp.sendRedirect("player.html");	
-		}		
+		}
+		return log;
+		*/
+		return null;
 	}
 	
 	public static String getAbsolutePath(HttpServletRequest req){

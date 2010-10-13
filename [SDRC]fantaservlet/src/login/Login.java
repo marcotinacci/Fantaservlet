@@ -1,74 +1,64 @@
 package login;
 
+import java.sql.SQLException;
 import javax.servlet.http.HttpSession;
+import dataconnection.MySQLConnection;
+import entities.UserEntity;
 
+/**
+ * classe che gestisce la comunicazione con i dati di login nelle variabili di sessione
+ * @author Markov
+ *
+ */
 public class Login {
-	private String nome;
-	private String password;
-	private boolean admin;
-	private boolean logged;
+	private HttpSession session;
 	
-	public Login(HttpSession req) {
-		this(req.getAttribute("name").toString(),req.getAttribute("password").toString());		
-	}	
+	public Login(HttpSession session){
+		this.session = session;
+	}
 	
-	public Login(String nome, String password){
-		this.nome = nome;
-		this.password = password;
-		
-		if(nome.equals("marco") && password.equals("marco")){
-			logged = true;
-			admin = true;
-		}else if(nome.equals("guest") && password.equals("guest")){
-			logged = true;
-			admin = false;
-		}else{
-			logged = false;
-			admin = false;
-		}
-		/*
-		DBConnection dbc = new DBConnection();
-		dbc.init();		
-		List<User> lu = dbc.getUsers();
+	/**
+	 * metodo che esegue il login di un utente
+	 * @param nome nome utente
+	 * @param password password utente
+	 * @throws SQLException sollevata quando la query sql fallisce
+	 * @throws BlankLoginInfoException sollevata quando nome utente o password sono lasciati vuoti
+	 * @throws WrongLoginInputException sollevata quando nome utente e password non 
+	 * corrispondono ai record presenti nel database
+	 */
+	public void login(String nome, String password) 
+		throws SQLException, BlankLoginInfoException, WrongLoginInputException{
+		// controlla che siano presenti tutti i dati
+		if(nome == null || password == null) throw new BlankLoginInfoException();
+		// trim
+		nome = nome.trim();
+		password = password.trim();
+		// controlla che i dati inseriti siano corretti
+		if(nome.equalsIgnoreCase("") || password.equalsIgnoreCase(""))
+			throw new BlankLoginInfoException();
+
+		// controlla che l'utente sia presente nel database
+		MySQLConnection dbc = new MySQLConnection();
+		dbc.init();
+		UserEntity user = dbc.getUser(nome);
 		dbc.destroy();
-		User u = new User(nome, password);
-		logged = false;
-		admin = false;
-		for(Iterator<User> it = lu.listIterator(); it.hasNext();){
-			User t = it.next();
-			if(t.equals(u)){
-				logged = true;
-				admin = t.isAdmin();
-				break;
-			}
-		}*/
-		
-		
-		
-	}
-
-	public void setNome(String nome) {
-		this.nome = nome;
-	}
-
-	public String getNome() {
-		return nome;
-	}
-
-	public void setPassword(String password) {
-		this.password = password;
-	}
-
-	public String getPassword() {
-		return password;
+		// se non esiste il nome utente o se la password è sbagliata
+		if(user == null || !user.getPassword().equals(password))
+			throw new WrongLoginInputException();
+		// se tutte le condizioni sono corrette inserisci i dati nella sessione
+		// session.setAttribute("utente", user);
+		session.setAttribute("utente", nome);
 	}
 	
-	public boolean isLogged(){
-		return logged;
+	public void logout(){
+		session.removeAttribute("utente");
+	}
+
+	public Boolean isLogged(){
+		return session.getAttribute("utente") != null;
 	}
 	
-	public boolean isAdmin(){
-		if(!isLogged()) throw new RuntimeException("Richiesta isAdmin su utente non loggato");
-		return admin;
+	public String getUser(){
+		return (String)session.getAttribute("utente");
 	}
 }

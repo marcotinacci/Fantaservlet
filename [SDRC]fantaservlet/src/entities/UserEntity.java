@@ -10,7 +10,7 @@ import dataconnection.MySQLConnection;
  * Entitˆ utente
  * @author Markov
  */
-public class UserEntity {
+public class UserEntity{
 
 	// identificativo utente
 	private Integer id;
