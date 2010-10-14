@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import utils.BeanUtilities;
+import utils.GenericUtilities;
 import view.Style;
 import dataconnection.MySQLConnection;
 import entities.PlayerEntity;
@@ -37,6 +38,7 @@ public class AddPlayer extends HttpServlet {
 		response.setContentType("text/html");
 		PrintWriter out = response.getWriter();
 		out.println(Style.pageHeader(TITLE));
+		GenericUtilities.checkLoggedIn(request, response, true);		
 		
 		// inserimento calciatore
 		Boolean nameAvailable = true;

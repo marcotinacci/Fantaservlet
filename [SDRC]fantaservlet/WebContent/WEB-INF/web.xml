@@ -4,12 +4,10 @@
     <servlet-name>test_printpdf</servlet-name>
     <servlet-class>servlets.PrintPDF</servlet-class>
   </servlet>
-
   <servlet-mapping>
     <servlet-name>test_printpdf</servlet-name>
     <url-pattern>/print</url-pattern>
   </servlet-mapping>
-  
   <servlet>
     <description></description>
     <display-name>adduser</display-name>

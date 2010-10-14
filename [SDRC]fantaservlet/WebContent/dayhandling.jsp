@@ -37,38 +37,7 @@ for(Iterator<ChampionshipEntity> i = lc.iterator();i.hasNext();){
 	// fissa un campionato c
 	ChampionshipEntity c = i.next();
 	out.println("<h2>Camptionato: "+c.getName()+"</h2>");
-	List<DayEntity> ld = dc.getDayOfChampionship(c.getId());
-	if(ld.size() > 0){
-		out.println("<table><tr><th>Giornata</th><th>Chiudi</th><th>Apri</th><th>Valuta</th></tr>");
-		// stampa le giornate del campionato c
-		for(Iterator<DayEntity> j = ld.iterator(); j.hasNext(); ){
-			DayEntity d = j.next();
-%>
-<tr>
-<td><%=d.getFormatDate()%></td>
-<td>
-	<form name="closeday" method="get">
-	<input type="hidden" name="closeday" value="<%=d.getId()%>">
-	<input type="submit" value="Chiudi" <%=d.isClose()? "disabled" : "" %>>
-	</form>
-</td><td>
-	<form name="openday" method="get">
-	<input type="hidden" name="openday" value="<%=d.getId()%>">
-	<input type="submit" value="Apri" <%=d.isEvaluated() || !d.isClose()? "disabled" : "" %>>	
-	</form>
-</td><td>
-	<form name="closeday" method="get">
-	<input type="hidden" name="evaluateday" value="<%=d.getId()%>">
-	<input type="submit" value="Valuta" <%=d.isEvaluated()? "disabled" : "" %>>
-	</form>
-</td>
-</tr>
-<%
-		}
-		out.println("</table>");
-	}else{
-		out.println(Style.infoMessage("Il campionato non &egrave; stato definito"));
-	}
+	out.println(Style.modDays(dc.getDayOfChampionship(c.getId())));
 }
 %>
 <a href="adminmenu.jsp">Torna al menu</a>

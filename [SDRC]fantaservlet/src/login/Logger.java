@@ -10,10 +10,10 @@ import entities.UserEntity;
  * @author Markov
  *
  */
-public class Login {
+public class Logger {
 	private HttpSession session;
 	
-	public Login(HttpSession session){
+	public Logger(HttpSession session){
 		this.session = session;
 	}
 	
@@ -47,7 +47,7 @@ public class Login {
 			throw new WrongLoginInputException();
 		// se tutte le condizioni sono corrette inserisci i dati nella sessione
 		// session.setAttribute("utente", user);
-		session.setAttribute("utente", nome);
+		session.setAttribute("utente", user);
 	}
 	
 	public void logout(){
@@ -58,7 +58,7 @@ public class Login {
 		return session.getAttribute("utente") != null;
 	}
 	
-	public String getUser(){
-		return (String)session.getAttribute("utente");
+	public UserEntity getUser(){
+		return (UserEntity)session.getAttribute("utente");
 	}
 }

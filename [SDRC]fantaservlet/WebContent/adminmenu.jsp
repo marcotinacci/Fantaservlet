@@ -17,6 +17,7 @@
 <li><a href="addreport.jsp">Assegna Voti</a></li>
 <li><a href="importplayers.jsp">Importa Calciatori</a></li>
 <li><a href="importreports.jsp">Importa Voti</a></li>
+<li><a href="Logout">Logout</a></li>
 </ul>
 </body>
 </html>

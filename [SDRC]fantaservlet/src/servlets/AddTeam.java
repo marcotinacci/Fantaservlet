@@ -18,6 +18,7 @@ import entities.TeamEntity;
 import entities.UserEntity;
 
 import utils.BeanUtilities;
+import utils.GenericUtilities;
 import view.Style;
 
 /**
@@ -42,6 +43,7 @@ public class AddTeam extends HttpServlet {
 		response.setContentType("text/html");
 		PrintWriter out = response.getWriter();
 		out.println(Style.pageHeader(TITLE));
+		GenericUtilities.checkLoggedIn(request, response, true);		
 		
 		// crea connessione al database
 		MySQLConnection dbc = new MySQLConnection();

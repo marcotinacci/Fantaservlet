@@ -1,5 +1,4 @@
 <%@page import="java.sql.SQLException"%>
-<%@page import="login.Login"%>
 <%@page import="entities.TeamEntity"%>
 <%@page import="utils.BeanUtilities"%>
 <%@page import="dataconnection.MySQLConnection"%>

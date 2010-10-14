@@ -9,13 +9,13 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 import dataconnection.MySQLConnection;
 
 import entities.ChampionshipEntity;
 
 import utils.BeanUtilities;
+import utils.GenericUtilities;
 import view.Style;
 
 /**
@@ -41,6 +41,7 @@ public class AddChampionship extends HttpServlet {
 		response.setContentType("text/html");
 		PrintWriter out = response.getWriter();
 		out.println(Style.pageHeader(TITLE));
+		GenericUtilities.checkLoggedIn(request, response, true);		
 		
 		// inserimento del campionato
 		Boolean nameAvailable = true;

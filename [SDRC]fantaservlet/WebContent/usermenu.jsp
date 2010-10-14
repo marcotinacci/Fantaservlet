@@ -1,3 +1,4 @@
+<%@page import="entities.UserEntity"%>
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -12,6 +13,7 @@
 <li><a href="formationhandling.jsp">Gestisci le formazioni giornaliere</a></li>
 <li><a href="showresults.jsp">Controlla i risultati</a></li>
 <li><a href="printpdf.jsp">Stampa PDF</a></li>
+<li><a href="Logout">logout</a></li>
 </ul>
 </body>
 </html>

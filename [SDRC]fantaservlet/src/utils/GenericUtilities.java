@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import entities.PlayerEntity;
 
-import login.Login;
+import login.Logger;
 
 public class GenericUtilities {
 	public static boolean hasValue(String str){
@@ -35,20 +35,18 @@ public class GenericUtilities {
 		return(l != null);
 	}	
 	
-	public static Login checkAdminLogged(HttpServletRequest req, HttpServletResponse resp)
-		throws IOException	
+	public static Logger checkLoggedIn(HttpServletRequest req, HttpServletResponse resp, Boolean isAdmin)
+		throws IOException
 	{
-		// TODO
-		/*
-		Login log = new Login(req.getSession());
+		Logger log = new Logger(req.getSession());
 		if(!log.isLogged()){
-			resp.sendRedirect("login");	
-		}else if(!log.getUser().isAdmin()){
-			resp.sendRedirect("player.html");	
+			resp.sendRedirect("Login");
+		}else if(log.getUser().isAdmin() && !isAdmin){
+			resp.sendRedirect("adminmenu.jsp");
+		}else if(!log.getUser().isAdmin() && isAdmin){
+			resp.sendRedirect("usermenu.jsp");
 		}
 		return log;
-		*/
-		return null;
 	}
 	
 	public static String getAbsolutePath(HttpServletRequest req){
