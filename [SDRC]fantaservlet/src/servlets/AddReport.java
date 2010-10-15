@@ -56,7 +56,7 @@ public class AddReport extends HttpServlet {
 		if(report.isComplete()){
 			try{
 				// inserimento report
-				dbc.InsertReport(report);
+				dbc.insertReport(report);
 				out.println(Style.successMessage("Valutazione inserita"));
 			}catch(SQLException sqle){
 				// in caso di errore SQL stampa l'alert

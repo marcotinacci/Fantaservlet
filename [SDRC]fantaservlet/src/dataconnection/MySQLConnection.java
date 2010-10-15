@@ -15,8 +15,6 @@ import java.sql.PreparedStatement;
 
 import utils.Pair;
 
-// TODO modificare i nomi dei metodi in lowerChamel (nomeMetodo)
-
 /**
  * @author Michael
  * Questa classe offre i metodi di interazione col database mysql (insert, select, delete)
@@ -127,7 +125,7 @@ public class MySQLConnection {
 	 * @param user utente da inserire
 	 * @throws SQLException sollevata quando la query fallisce
 	 */
-	public void InsertUser(UserEntity user) throws SQLException{
+	public void insertUser(UserEntity user) throws SQLException{
 		preparedStatement = connection.prepareStatement(
 			"INSERT INTO Utente(Nome,Password,Admin) VALUES (?,?,?)");
 		preparedStatement.setString(1, user.getName());
@@ -152,6 +150,33 @@ public class MySQLConnection {
 		return lc;
 	}
 
+	/**
+	 * metodo che ritorna i campionati nei quali possono essere ancora convocati giocatori
+	 * @return lista di campionati
+	 * @throws SQLException sollevata quando la query fallisce
+	 */
+	public List<ChampionshipEntity> getHireableChampionships() throws SQLException {
+		List<ChampionshipEntity> lc = new ArrayList<ChampionshipEntity>();
+		/* 
+		 * la query seleziona i campionati che contengono squadre che non hanno ancora giocatori
+		 * convocati, le squadre che hanno già la convocazione vengono selezionate nella sub-query
+		 * e da quella esterna si seleziona i campionati che hanno almeno una squadra che non è
+		 * presente nella sub-query
+		 */
+		String query = 
+			"SELECT DISTINCT C.idCampionato, C.Nome " +
+			"FROM Campionato C INNER JOIN Squadra S ON C.idCampionato = S.Campionato_idCampionato " +
+			"WHERE S.idSquadra NOT IN (" +
+				"SELECT S1.idSquadra " +
+				"FROM Squadra S1 INNER JOIN Convocazione C1 ON S1.idSquadra = C1.Squadra_idSquadra )";
+		preparedStatement = connection.prepareStatement(query);
+		ResultSet res = preparedStatement.executeQuery();
+		while (res.next()){
+			lc.add(new ChampionshipEntity(res.getInt("idCampionato"),res.getString("Nome")));
+		}
+		return lc;
+	}	
+	
 	/**
 	 * metodo che restituisce i calciatori
 	 * @return lista calciatori
@@ -178,7 +203,7 @@ public class MySQLConnection {
 	 * @param player calciatore da inserire
 	 * @throws SQLException eccezione lanciata in caso di violazione del vincolo UNIQUE sui campi Nome e Squadra
 	 */
-	public void InsertPlayer(PlayerEntity player) throws SQLException{
+	public void insertPlayer(PlayerEntity player) throws SQLException{
 		// usa uno statement precompilato per prevenire injection, prevalentemente per gli apici
 		preparedStatement = connection.prepareStatement("INSERT INTO Calciatore(Nome,Ruolo,Squadra) VALUES (?,?,?)");
 		// inserisci il nome
@@ -197,7 +222,7 @@ public class MySQLConnection {
 	 * @param championship campionato da inserire
 	 * @throws SQLException sollevata quando la query sql fallisce
 	 */
-	public void InsertChampionship(ChampionshipEntity championship) throws SQLException{
+	public void insertChampionship(ChampionshipEntity championship) throws SQLException{
 		String query = "INSERT INTO Campionato(Nome) VALUES (?)";
 		preparedStatement = connection.prepareStatement(query);
 		preparedStatement.setString(1, championship.getName());
@@ -243,7 +268,7 @@ public class MySQLConnection {
 	 * @param championship campionato da inserire
 	 * @throws SQLException sollevata quando la query fallisce
 	 */
-	public void InsertTeam(TeamEntity team) throws SQLException{
+	public void insertTeam(TeamEntity team) throws SQLException{
 		String query = "INSERT INTO Squadra(Nome,Campionato_idCampionato,Utente_idUtente) VALUES (?,?,?)";
 		preparedStatement = connection.prepareStatement(query);
 		preparedStatement.setString(1, team.getName());
@@ -575,7 +600,7 @@ public class MySQLConnection {
 	 * @param report votazione da inserire
 	 * @throws SQLException sollevata quando la query fallisce
 	 */
-	public void InsertReport(ReportEntity report) throws SQLException{
+	public void insertReport(ReportEntity report) throws SQLException{
 		// query di inserimento votazione in pagella
 		String query = 
 			"INSERT INTO Pagella(Voto_idVoto,Giornata_idGiornata,Calciatore_idCalciatore) VALUES (?,?,?)";

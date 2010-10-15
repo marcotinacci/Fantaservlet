@@ -76,7 +76,7 @@ public class AddTeam extends HttpServlet {
 						// TODO prendere il numero massimo di squadre per campionato da file di configurazione
 						underMaxLimit = dbc.getTeamsOfChampionship(team.getChampionship()).size() < 12;
 						if(nameAvailable && underMaxLimit){
-							dbc.InsertTeam(team);
+							dbc.insertTeam(team);
 							// stampa avvenuto inserimento
 							out.println(Style.successMessage("Squadra "+team.getName()+" creata."));
 						}

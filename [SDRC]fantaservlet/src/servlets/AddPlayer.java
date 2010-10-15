@@ -38,7 +38,7 @@ public class AddPlayer extends HttpServlet {
 		response.setContentType("text/html");
 		PrintWriter out = response.getWriter();
 		out.println(Style.pageHeader(TITLE));
-		GenericUtilities.checkLoggedIn(request, response, true);		
+		GenericUtilities.checkLoggedIn(request, response, true);	
 		
 		// inserimento calciatore
 		Boolean nameAvailable = true;
@@ -50,7 +50,7 @@ public class AddPlayer extends HttpServlet {
 				MySQLConnection dbc = new MySQLConnection();
 				dbc.init();		
 				try {
-					dbc.InsertPlayer(player);
+					dbc.insertPlayer(player);
 					// stampa avvenuto inserimento
 					out.println(Style.successMessage("Calciatore "+player.getName()+" creato."));					
 				}catch (SQLException sqle){

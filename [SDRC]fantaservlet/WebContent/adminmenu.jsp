@@ -7,14 +7,14 @@
 <body>
 <h1>Admin Menu</h1>
 <ul>
-<li><a href="adduser.jsp">Crea Utente</a></li>
-<li><a href="addchamp.jsp">Crea Campionato</a></li>
-<li><a href="addteam.jsp">Crea Squadra</a></li>
-<li><a href="addplayer.jsp">Crea Calciatore</a></li>
+<li><a href="AddUser">Crea Utente</a></li>
+<li><a href="AddChampionship">Crea Campionato</a></li>
+<li><a href="AddTeam">Crea Squadra</a></li>
+<li><a href="AddPlayer">Crea Calciatore</a></li>
 <li><a href="hireplayers.jsp">Convoca Calciatori</a></li>
 <li><a href="computecalendar.jsp">Genera Calendario</a></li>
 <li><a href="dayhandling.jsp">Gestisci le Giornate</a></li>
-<li><a href="addreport.jsp">Assegna Voti</a></li>
+<li><a href="AddReport">Assegna Voti</a></li>
 <li><a href="importplayers.jsp">Importa Calciatori</a></li>
 <li><a href="importreports.jsp">Importa Voti</a></li>
 <li><a href="Logout">Logout</a></li>
