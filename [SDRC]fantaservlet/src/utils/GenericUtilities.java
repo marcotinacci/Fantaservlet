@@ -33,6 +33,10 @@ public class GenericUtilities {
 	
 	public static boolean hasValue(Long l) {
 		return(l != null);
+	}
+
+	public static Boolean hasValue(Double d) {
+		return (d != null);
 	}	
 	
 	public static Logger checkLoggedIn(HttpServletRequest req, HttpServletResponse resp, Boolean isAdmin)
@@ -94,5 +98,4 @@ public class GenericUtilities {
 		}
 		return sublist;
 	}
-
 }

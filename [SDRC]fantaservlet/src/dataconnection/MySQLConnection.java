@@ -614,6 +614,26 @@ public class MySQLConnection {
 		// esegui la query
 		preparedStatement.executeUpdate();		
 	}
+	
+	/**
+	 * metodo che inserisce i dati di un giudge nel database
+	 * @param giudge giudizio da inserire
+	 * @throws SQLException sollevata quando la query fallisce
+	 */
+	public void insertGiudge(GiudgeEntity giudge) throws SQLException{
+		// query di inserimento giudizio
+		String query = 
+			"INSERT INTO Giudizio(Voto,Giornata_idGiornata,Calciatore_idCalciatore) VALUES (?,?,?)";
+		preparedStatement = connection.prepareStatement(query);
+		// inserisci giudizio numerico
+		preparedStatement.setDouble(1, giudge.getVote());
+		// inserisci id giornata
+		preparedStatement.setInt(2, giudge.getDay());
+		// inserisci id calciatore
+		preparedStatement.setInt(3, giudge.getPlayer());
+		// esegui la query
+		preparedStatement.executeUpdate();		
+	}	
 
 	/**
 	 * metodo che restituisce l'id di un calciatore sapendone il nome e la squadra di provenienza
@@ -1130,5 +1150,5 @@ public class MySQLConnection {
 				res.getDouble("Punti")));
 		}
 		return pointList;
-	}	 	
+	}	
 }

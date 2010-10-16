@@ -19,6 +19,7 @@ import org.apache.tomcat.util.http.fileupload.disk.DiskFileItemFactory;
 import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
 
 import utils.GenericUtilities;
+import utils.Pair;
 import view.Style;
 
 import dataconnection.MySQLConnection;
@@ -26,6 +27,7 @@ import dataimport.IReadFile;
 import dataimport.ReadXLS;
 import entities.ChampionshipEntity;
 import entities.DayEntity;
+import entities.GiudgeEntity;
 import entities.ReportEntity;
 
 /**
@@ -60,7 +62,7 @@ public class ImportReports extends HttpServlet {
 		{
 			try{
 				// TODO problemi inizializzazione
-				List<ReportEntity> lr = null;
+				Pair<List<ReportEntity>,List<GiudgeEntity>> lists = null;
 				// TODO problemi inizializzazione	
 				Integer did = -1;
 				ServletFileUpload upload = new ServletFileUpload(new DiskFileItemFactory());
@@ -75,12 +77,12 @@ public class ImportReports extends HttpServlet {
 				    	// leggi i voti da file
 				        InputStream in = item.getInputStream();
 				    	IReadFile xls = new ReadXLS();
-				    	lr = xls.getReports(in);
+				    	lists = xls.getReports(in);
 				        in.close();
 				    }
 				}
 				// per ogni report
-				for(Iterator<ReportEntity> it = lr.iterator(); it.hasNext();){
+				for(Iterator<ReportEntity> it = lists.first.iterator(); it.hasNext();){
 					ReportEntity rep = it.next();
 					// aggiorna i dati con il codice della giornata
 					rep.setDay(did);
@@ -96,6 +98,24 @@ public class ImportReports extends HttpServlet {
 						out.println(Style.alertMessage("Voto "+rep+" non inserito."));				
 					}
 				}
+				// per ogni giudge
+				for(Iterator<GiudgeEntity> it = lists.second.iterator(); it.hasNext();){
+					GiudgeEntity rep = it.next();
+					// aggiorna i dati con il codice della giornata
+					rep.setDay(did);
+					// se il giudge è completo inseriscilo nel database
+					if(rep.isComplete()){
+						try{
+							dbc.insertGiudge(rep);
+							out.println(Style.successMessage("Giudizio "+rep+" inserito."));
+						}catch(SQLException sqle){
+							out.println(Style.alertMessage("Errore SQL: "+sqle.getMessage()));
+						}
+					}else{
+						out.println(Style.alertMessage("Giudizio "+rep+" non inserito."));				
+					}
+				}
+				
 			}catch (FileUploadException e) {
 				out.println(Style.alertMessage("Errore FileUpload: "+e.getMessage()));
 			}
@@ -103,7 +123,8 @@ public class ImportReports extends HttpServlet {
 
 		try {
 			// stampa il form di importazione dei voti
-			out.println("<form name=\"importreports\" method=\"POST\" enctype=\"multipart/form-data\">");
+			out.println("<form name=\"importreports\" method=\"POST\" " +
+				"enctype=\"multipart/form-data\">");
 			out.println("Giornata: <select name=\"day\" id=\"day\">");
 			
 			// lista dei campionati

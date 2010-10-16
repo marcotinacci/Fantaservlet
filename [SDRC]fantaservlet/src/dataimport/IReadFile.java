@@ -2,6 +2,10 @@ package dataimport;
 
 import java.io.InputStream;
 import java.util.List;
+
+import utils.Pair;
+
+import entities.GiudgeEntity;
 import entities.PlayerEntity;
 import entities.ReportEntity;
 
@@ -22,8 +26,9 @@ public interface IReadFile {
 	 * metodo che estrai i dati dei voti (reports) da un file
 	 * @param req richiesta http
 	 * @param fileName nome del file salvato in locale
-	 * @return lista dei voti completi di codice voto e codice calciatore 
-	 * (il codice giornata è nullo e deve essere impostato successivamente)
+	 * @return coppia di lista dei voti e lista dei giudizi completi di codice voto 
+	 * e codice calciatore (il codice giornata è nullo e deve essere impostato 
+	 * successivamente)
 	 */
-	public List<ReportEntity> getReports(InputStream in);
+	public Pair<List<ReportEntity>,List<GiudgeEntity>> getReports(InputStream in);
 }

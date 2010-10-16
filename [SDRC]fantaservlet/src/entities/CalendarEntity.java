@@ -4,7 +4,7 @@ import utils.GenericUtilities;
 
 public class CalendarEntity{
 	private Integer idChampionship;
-	private Long startDate;
+	private String name;
 	
 	public CalendarEntity() {
 	}
@@ -14,15 +14,14 @@ public class CalendarEntity{
 	public void setIdChampionship(Integer idChampionship) {
 		this.idChampionship = idChampionship;
 	}
-	public Long getStartDate() {
-		return startDate;
+	public String getName(){
+		return name;
 	}
-	public void setStartDate(Long startDate) {
-		this.startDate = startDate;
+	public void setName(String name){
+		this.name = name;
 	}
 	
 	public Boolean isComplete(){
-		return GenericUtilities.hasValue(getIdChampionship()) &&
-			GenericUtilities.hasValue(getStartDate());
+		return GenericUtilities.hasValue(getName());
 	}
 }

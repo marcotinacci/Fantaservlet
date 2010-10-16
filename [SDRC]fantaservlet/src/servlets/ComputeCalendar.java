@@ -50,25 +50,31 @@ public class ComputeCalendar extends HttpServlet {
 		CalendarEntity cal = new CalendarEntity();
 		BeanUtilities.populateBean(cal, request);
 
-		if(cal.isComplete()){
-			// genera calendario
-			CalendarGenerator cg = new CalendarGenerator(cal);
-			try{
-				cg.generate();
-				out.println(Style.successMessage("Calendario generato"));		
-			}catch(BadTeamsNumberException btne){
-				// squadre dispari
-				if(!btne.isEven()){
-					out.println(Style.alertMessage("Le squadre assegnate sono un numero "+ 
-						"dispari: sono presenti "+ btne.getNumTeams() + " squadre."));
+		if(cal.getIdChampionship() != null){
+			String time = request.getParameter("startDate");
+			if(time != null){			
+				CalendarGenerator cg = new CalendarGenerator(cal,Long.parseLong(time));
+				try{
+					// genera calendario					
+					cg.generate();
+					out.println(Style.successMessage("Calendario generato"));		
+				}catch(BadTeamsNumberException btne){
+					// squadre dispari
+					if(!btne.isEven()){
+						out.println(Style.alertMessage("Le squadre assegnate sono un numero "+ 
+							"dispari: sono presenti "+ btne.getNumTeams() + " squadre."));
+					}
+					// squadre fuori dal range
+					if(!btne.isInRange()){
+						out.println(Style.alertMessage(
+							"Le squadre non sono nel range [6,12]: sono presenti "+ 
+							+ btne.getNumTeams()+ " squadre."));
+					}
+				} catch (SQLException sqle) {
+					out.println(Style.alertMessage("Errore SQL: "+sqle.getMessage()));				
 				}
-				// squadre fuori dal range
-				if(!btne.isInRange()){
-					out.println(Style.alertMessage("Le squadre non sono nel range [6,12]: sono presenti "+ 
-						+ btne.getNumTeams()+ " squadre."));
-				}
-			} catch (SQLException sqle) {
-				out.println(Style.alertMessage("Errore SQL: "+sqle.getMessage()));				
+			}else{
+				out.println(Style.alertMessage("Errore: il parametro interno 'startDate' non è presente"));
 			}
 		}
 
@@ -89,7 +95,7 @@ public class ComputeCalendar extends HttpServlet {
 					out.println(Style.option(c.getId().toString(),c.getName()));
 				}
 				out.println("</select><br>");
-				out.println("<input type=\"hidden\" name=\"startDate\" value="+
+				out.println("<input type=\"hidden\" name=\"startDate\" value=\""+
 					(Calendar.getInstance().getTimeInMillis()+1000*60*60*24*7)+"\">");
 				out.println("<input type=\"submit\" value=\"crea\">");
 				out.println("</form>");

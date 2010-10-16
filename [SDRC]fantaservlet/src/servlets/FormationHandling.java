@@ -58,7 +58,7 @@ public class FormationHandling extends HttpServlet {
 		try {			
 			// codice del form da stampare
 			StringBuffer code = new StringBuffer();
-			code.append("<form action=\"formationhandling.jsp\" method=\"POST\">\n");
+			code.append("<form name=\"formationhandling\" method=\"POST\">\n");
 			code.append("Scegli la giornata:\n");
 			code.append("<select name=\"day\">\n");
 
@@ -200,7 +200,7 @@ public class FormationHandling extends HttpServlet {
 								out.println("<p>La formazione della squadra <b>"+team.getName()+
 									"</b> &egrave; la seguente:</p>");
 								out.println("<ul>");
-								out.println("<li><b>Modulo:</b>"+
+								out.println("<li><b>Modulo:</b> "+
 									formation.getDef().length+ " - "+
 									formation.getCen().length+ " - "+
 									formation.getAtt().length);

@@ -227,6 +227,32 @@ CREATE  TABLE IF NOT EXISTS `fsdb`.`Partita` (
 ENGINE = InnoDB;
 
 
+-- -----------------------------------------------------
+-- Table `fsdb`.`Giudizio`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `fsdb`.`Giudizio` ;
+
+CREATE  TABLE IF NOT EXISTS `fsdb`.`Giudizio` (
+  `idGiudizio` INT NOT NULL AUTO_INCREMENT ,
+  `Giornata_idGiornata` INT NOT NULL ,
+  `Calciatore_idCalciatore` INT NOT NULL ,
+  `Voto` DECIMAL(3,1) NOT NULL ,
+  PRIMARY KEY (`idGiudizio`) ,
+  INDEX `fk_Giudizio_Giornata1` (`Giornata_idGiornata` ASC) ,
+  INDEX `fk_Giudizio_Calciatore1` (`Calciatore_idCalciatore` ASC) ,
+  CONSTRAINT `fk_Giudizio_Giornata1`
+    FOREIGN KEY (`Giornata_idGiornata` )
+    REFERENCES `fsdb`.`Giornata` (`idGiornata` )
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_Giudizio_Calciatore1`
+    FOREIGN KEY (`Calciatore_idCalciatore` )
+    REFERENCES `fsdb`.`Calciatore` (`idCalciatore` )
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
 
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;

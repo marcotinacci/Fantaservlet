@@ -15,9 +15,11 @@ import entities.TeamEntity;
 
 public class CalendarGenerator {
 	private CalendarEntity calendar;
+	private Long time;
 
-	public CalendarGenerator(CalendarEntity calendar) {
+	public CalendarGenerator(CalendarEntity calendar, Long time) {
 		this.calendar = calendar;
+		this.time = time;
 	}
 
 	public CalendarEntity getCalendar() {
@@ -27,6 +29,14 @@ public class CalendarGenerator {
 	public void setCalendar(CalendarEntity calendar) {
 		this.calendar = calendar;
 	}
+	
+	public Long getTime() {
+		return time;
+	}
+
+	public void setTime(Long time) {
+		this.time = time;
+	}	
 	
 	public void generate() throws BadTeamsNumberException, SQLException
 	{
@@ -48,15 +58,14 @@ public class CalendarGenerator {
 		nDay = (nTeam-1)*2;
 		
 		// genera le GIORNATE
-		long weeks = 0;
 		List<DayEntity> lde = new ArrayList<DayEntity>();
-		for(Integer i = 0; i < nDay; i++, weeks += 1000*60*60*24*7){
+		for(Integer i = 0; i < nDay; i++, time += 1000*60*60*24*7){
 			// crea giornata
 			DayEntity d = new DayEntity(
 				// campionato di appartenenza
 				calendar.getIdChampionship(),
 				// data della giornata incrementata di i settimane
-				new Date(calendar.getStartDate() + weeks),
+				new Date(time),
 				// la giornata viene creata aperta a modifiche
 				false,
 				// la giornata deve essere ancora valutata

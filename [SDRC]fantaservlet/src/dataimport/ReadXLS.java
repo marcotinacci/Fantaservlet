@@ -11,7 +11,10 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
+
+import utils.Pair;
 import dataconnection.MySQLConnection;
+import entities.GiudgeEntity;
 import entities.PlayerEntity;
 import entities.ReportEntity;
 
@@ -24,8 +27,11 @@ public class ReadXLS implements IReadFile {
 	// TODO come eliminare la connessione al database da getreports?
 	
 	@Override
-	public List<ReportEntity> getReports(InputStream in) {
+	public Pair<List<ReportEntity>,List<GiudgeEntity>> getReports(InputStream in) {
+		// lista dei report delle azioni
 		List<ReportEntity> lr = new ArrayList<ReportEntity>();
+		// lista dei giudizi dei calciatori
+		List<GiudgeEntity> lg = new ArrayList<GiudgeEntity>();
 		try {
 			// estrai i dati dal file xls
 			POIFSFileSystem fileSystem = null;
@@ -50,7 +56,13 @@ public class ReadXLS implements IReadFile {
 					row.getCell(1).getStringCellValue(),
 					// squadra di provenienza
 					row.getCell(2).getStringCellValue());
-
+				
+				// giudizio
+				if(row.getCell(4).getCellType() == Cell.CELL_TYPE_NUMERIC){
+					double temp = row.getCell(4).getNumericCellValue();
+					lg.add(new GiudgeEntity(null, pid, temp));
+				}
+				
 				// gol segnati (1)
 				for(int i = row.getCell(5).getCellType() == Cell.CELL_TYPE_NUMERIC ? (int)row.getCell(5).getNumericCellValue() : 0
 						; i > 0; i--){
@@ -86,15 +98,17 @@ public class ReadXLS implements IReadFile {
 						; i > 0; i--){
 					lr.add(new ReportEntity(7, null, pid));
 				}
-			}	
+			}
 		}catch(IOException e){
+			lg = null;
 			lr = null;
 			e.printStackTrace();
 		}catch(SQLException sqle){
+			lg = null;
 			lr = null;
 			sqle.printStackTrace();				
 		}
-		return lr;
+		return new Pair<List<ReportEntity>, List<GiudgeEntity>>(lr, lg);
 	}
 	
 	@Override
