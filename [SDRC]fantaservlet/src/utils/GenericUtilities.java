@@ -42,9 +42,9 @@ public class GenericUtilities {
 		if(!log.isLogged()){
 			resp.sendRedirect("Login");
 		}else if(log.getUser().isAdmin() && !isAdmin){
-			resp.sendRedirect("adminmenu.jsp");
+			resp.sendRedirect("AdminMenu");
 		}else if(!log.getUser().isAdmin() && isAdmin){
-			resp.sendRedirect("usermenu.jsp");
+			resp.sendRedirect("UserMenu");
 		}
 		return log;
 	}

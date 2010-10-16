@@ -11,6 +11,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import entities.UserEntity;
+
 import login.BlankLoginInfoException;
 import login.Logger;
 import login.WrongLoginInputException;
@@ -43,9 +45,14 @@ public class Login extends HttpServlet {
 		HttpSession session = request.getSession();
 		
 		// controlla se è stato già effettuato il login
-		if(session.getAttribute("utente") != null){
+		UserEntity user = (UserEntity) session.getAttribute("utente");		
+		if(user != null){
 			// se si è già loggati manda al menu
-			response.sendRedirect("usermenu.jsp");
+			if(user.isAdmin()){
+				response.sendRedirect("AdminMenu");				
+			}else{
+				response.sendRedirect("UserMenu");
+			}
 		}
 
 		String nome = request.getParameter("nome");
@@ -59,9 +66,9 @@ public class Login extends HttpServlet {
 				if(logger.isLogged()){
 					session.setAttribute("utente",logger.getUser());
 					if(logger.getUser().isAdmin()){
-						response.sendRedirect("adminmenu.jsp");						
+						response.sendRedirect("AdminMenu");						
 					}else{
-						response.sendRedirect("usermenu.jsp");
+						response.sendRedirect("UserMenu");
 					}
 				}
 				out.println(Style.alertMessage("Nome utente o password non sono corretti"));

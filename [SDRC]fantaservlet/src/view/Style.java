@@ -57,8 +57,21 @@ public class Style {
 	 * @return la stringa di chiusura
 	 */
 	static public String pageFooter(){
-		return "<a href=\"index.jsp\">Torna alla pagina iniziale</a></body></html>";
+		return pageFooter(true);
 	}
+	
+	/**
+	 * metodo di stampa del codice html di chiusura della pagina, il flag indica se inserire o meno
+	 * il link al menu principale
+	 * @param hasLink flag che indica la presenza del link al menu principale
+	 * @return la stringa di chiusura
+	 */
+	static public String pageFooter(Boolean hasLink){
+		if(hasLink)
+			return "<a href=\"Login\">Torna al menu</a></body></html>";
+		else
+			return "</body></html>";
+	}	
 	
 	/**
 	 * metodo che ritorna il codice html di una lista che mostra gli elementi passati per parametro
@@ -177,6 +190,6 @@ public class Style {
 			code.append(Style.infoMessage("Il campionato non &egrave; stato definito"));
 		}
 		return code.toString();
-	}
+	} 
 	
 }

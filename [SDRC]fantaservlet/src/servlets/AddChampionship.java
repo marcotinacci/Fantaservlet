@@ -41,7 +41,7 @@ public class AddChampionship extends HttpServlet {
 		response.setContentType("text/html");
 		PrintWriter out = response.getWriter();
 		out.println(Style.pageHeader(TITLE));
-		GenericUtilities.checkLoggedIn(request, response, true);		
+		GenericUtilities.checkLoggedIn(request, response, true);
 		
 		// inserimento del campionato
 		Boolean nameAvailable = true;
