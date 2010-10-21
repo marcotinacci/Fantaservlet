@@ -16,7 +16,9 @@ import javax.servlet.http.HttpServletResponse;
 import login.Logger;
 
 import utils.BeanUtilities;
+import utils.Config;
 import utils.GenericUtilities;
+import utils.Tern;
 import view.Style;
 
 import dataconnection.MySQLConnection;
@@ -31,8 +33,10 @@ import entities.TeamEntity;
  */
 @WebServlet("/FormationHandling")
 public class FormationHandling extends HttpServlet {
+	
 	private static final String TITLE = "Gestione delle Formazioni";
-       
+
+	
     /**
      * @see HttpServlet#HttpServlet()
      */
@@ -115,20 +119,25 @@ public class FormationHandling extends HttpServlet {
 					for(Iterator<DayEntity> it = ld.iterator(); it.hasNext();){
 						lid.add(((DayEntity)it.next()).getId());
 					}
-					// se la formazione ricevuta è corretta, non è già presente una formazione
-					// e la giornata è ancora aperta a modifiche		
-					if(fe.isCorrect() && 
-						dbc.getFormation(fe.getTeam(), fe.getDay()).getPlayers().size() == 0 && 
-						lid.contains(fe.getDay()))
-					{
-						// inserisci i dati della convocazione
-						dbc.insertFormation(fe);
-						out.println(Style.successMessage("Formazione salvata"));
+
+					if(fe.isComplete()){
+						// se la formazione ricevuta è corretta, non è già presente una formazione
+						// e la giornata è ancora aperta a modifiche						
+						if(fe.isCorrect() && 
+							dbc.getFormation(fe.getTeam(), fe.getDay()).isEmpty() && 
+							lid.contains(fe.getDay()))
+						{
+							// inserisci i dati della convocazione
+							dbc.insertFormation(fe);
+							out.println(Style.successMessage("Formazione salvata"));
+						}else{
+							// dati inseriti scorretti
+							// TODO leggere i numeri da file di configurazione
+							out.println(Style.alertMessage("I dati inseriti non sono corretti: "+ 
+								"le formazioni possibili sono 3-4-3, 3-5-2, 4-5-1, 4-4-2, 4-3-3, 5-4-1, 5-3-2"));
+						}
 					}else{
-						// dati inseriti scorretti
-						// TODO leggere i numeri da file di configurazione
-						out.println(Style.alertMessage("I dati inseriti non sono corretti: "+ 
-							"le formazioni possibili sono 3-4-3, 3-5-2, 4-5-1, 4-4-2, 4-3-3, 5-4-1, 5-3-2"));
+						out.println(Style.alertMessage("Inserire tutti i dati"));
 					}
 				}catch(SQLException sqle){
 					out.println(Style.alertMessage("Errore SQL: "+sqle.getMessage()));
@@ -147,16 +156,20 @@ public class FormationHandling extends HttpServlet {
 					for(Iterator<DayEntity> it = ld.iterator(); it.hasNext();){
 						lid.add(((DayEntity)it.next()).getId());
 					}
-					if(fe.isCorrect() && lid.contains(fe.getDay()))
-					{		
-						// aggiorna la formazione passando al metodo il nuovo e il vecchio schieramento
-						dbc.updateFormation(fe,dbc.getFormation(fe.getTeam(), fe.getDay()));			
-						out.println(Style.successMessage("Formazione modificata"));
-					}else{
+					if(!fe.isComplete()){
+						out.println(Style.alertMessage("Inserire tutti i dati"));
+					}else if(!fe.isCorrect()){
 						// dati inseriti scorretti
 						// TODO leggere i numeri da file di configurazione
 						out.println(Style.alertMessage("I dati inseriti non sono corretti: "+ 
 							"le formazioni possibili sono 3-4-3, 3-5-2, 4-5-1, 4-4-2, 4-3-3, 5-4-1, 5-3-2"));
+					}else if(!lid.contains(fe.getDay())){
+						// la giornata è chiusa alle modifiche
+						out.println(Style.alertMessage("Non è possibile fare modifiche a una giornata chiusa"));						
+					}else{
+						// aggiorna la formazione passando al metodo il nuovo e il vecchio schieramento
+						dbc.updateFormation(fe,dbc.getFormation(fe.getTeam(), fe.getDay()));			
+						out.println(Style.successMessage("Formazione modificata"));
 					}
 				}catch(SQLException sqle){
 					out.println(Style.alertMessage("Errore SQL: "+sqle.getMessage()));					
@@ -169,6 +182,7 @@ public class FormationHandling extends HttpServlet {
 				// determina se la giornata è aperta alle modifiche
 				List<DayEntity> openDays = 
 					dbc.getOpenDayOfChampionship(dbc.getChampionshipOfDay(did).getId());
+				// TODO si può fare il controllo direttamente durante il primo ciclo
 				List<Integer> openDaysId = new ArrayList<Integer>();
 				for(Iterator<DayEntity> it = openDays.iterator(); it.hasNext();){
 					openDaysId.add(((DayEntity)it.next()).getId());
@@ -182,42 +196,46 @@ public class FormationHandling extends HttpServlet {
 				if(lTeam.size() > 0){
 					// per ogni squadra
 					for(Iterator<TeamEntity> it = lTeam.iterator(); it.hasNext();){
-						out.println("<hr>"); 
 						TeamEntity team = it.next();
+						out.println("<hr>\n<h2>"+team.getName()+"</h2>");						
 						// prendi le convocazioni della squadra da database
 						List<PlayerEntity> hiredPlayers = dbc.getHiredPlayers(team.getId());
 						//se sono stati convocati giocatori per questa squadra
 						if(hiredPlayers.size() > 0){
 							// recupera da database la formazione della squadra nel giorno
 							FormationEntity formation = dbc.getFormation(team.getId(), did);
-							// memorizzo la lista di id per evitare di ricalcolarla ogni volta
-							List<Integer> formationList = formation.getPlayers();
-							if(formationList.size() > 0){
-								// se ci sono giocatori la formazione è già presente
+							if(!formation.isEmpty()){
 								// --- formazione attuale ---
 								// recupera i dati dei calciatori nella formazione
-								List<PlayerEntity> players = dbc.getPlayersById(formationList);
 								out.println("<p>La formazione della squadra <b>"+team.getName()+
 									"</b> &egrave; la seguente:</p>");
 								out.println("<ul>");
 								out.println("<li><b>Modulo:</b> "+
-									formation.getDef().length+ " - "+
-									formation.getCen().length+ " - "+
-									formation.getAtt().length);
-								out.println("<li><b>Difensori:</b>"+
-									Style.showPlayersList(GenericUtilities.getPlayersListByRule(players,'D'),false));
-								out.println("<li><b>Centrocampisti:</b>"+
-									Style.showPlayersList(GenericUtilities.getPlayersListByRule(players,'C'),false));		
-								out.println("<li><b>Attaccanti:</b>"+
-									Style.showPlayersList(GenericUtilities.getPlayersListByRule(players,'A'),false));		
-								out.println("<li><b>Portiere:</b>"+
-									Style.showPlayersList(GenericUtilities.getPlayersListByRule(players,'P'),false));		
+									formation.getDef().size()+ " - "+
+									formation.getCen().size()+ " - "+
+									formation.getAtt().size());
+								out.println("<li><b>Difensori Titolari:</b>"+
+									Style.showPlayersList(dbc.getPlayersById(formation.getDef()),false));
+								out.println("<li><b>Difensori Riserve:</b>"+
+										Style.showPlayersList(dbc.getPlayersById(formation.getResDef()),false));								
+								out.println("<li><b>Centrocampisti Titolari:</b>"+
+									Style.showPlayersList(dbc.getPlayersById(formation.getCen()),false));
+								out.println("<li><b>Centrocampisti Riserve:</b>"+
+										Style.showPlayersList(dbc.getPlayersById(formation.getResCen()),false));	
+								out.println("<li><b>Attaccanti Titolari:</b>"+
+										Style.showPlayersList(dbc.getPlayersById(formation.getAtt()),false));								
+								out.println("<li><b>Attaccanti Riserve:</b>"+
+									Style.showPlayersList(dbc.getPlayersById(formation.getResAtt()),false));		
+								out.println("<li><b>Portiere Titolare:</b>"+
+									Style.showPlayersList(dbc.getPlayersById(formation.getGolkeep()),false));
+								out.println("<li><b>Portiere Riserva:</b>"+
+										Style.showPlayersList(dbc.getPlayersById(formation.getResGolkeep()),false));								
 								out.println("</ul>");
 							}
 							
 							if(isOpenDay){
 								// --- form inserimento formazione ---
-								if(formationList.size() > 0){
+								if(!formation.isEmpty()){
 									out.println(
 										"<p>&Egrave; ancora possibile modificare la formazione: </p>");
 								}else{
@@ -225,35 +243,34 @@ public class FormationHandling extends HttpServlet {
 										team.getName()+"</b> deve ancora essere inserita:</p>");
 								}
 								out.println("<form name=\"formationhandling\" method=\"POST\">");
-								out.println("<table border=\"1\">");
-								out.println("<tr>");
-								out.println("<th>Difensori</th>");
-								out.println("<th>Centrocampisti</th>");
-								out.println("<th>Attaccanti</th>");
-								out.println("<th>Portieri</th>");
-								out.println("</tr>");
-								out.println("<tr>");
-								out.println("<td valign=\"top\">"+
-									Style.selectPlayers(
-									GenericUtilities.getPlayersListByRule(hiredPlayers,'D'),"def",
-									formationList));
-								out.println("</td><td valign=\"top\">"+
-									Style.selectPlayers(
-									GenericUtilities.getPlayersListByRule(hiredPlayers,'C'),"cen",
-									formationList));
-								out.println("</td><td valign=\"top\">"+
-									Style.selectPlayers(
-									GenericUtilities.getPlayersListByRule(hiredPlayers,'A'),"att",
-									formationList));
-								out.println("</td><td valign=\"top\">"+
-									Style.selectPlayers(
-									GenericUtilities.getPlayersListByRule(hiredPlayers,'P'),"golkeep",
-									formationList));							
-								out.println("</td></tr></table>");
+								out.println("<h3>Modulo</h3>");
+								for(Integer i = 0; i < Config.getFormations().size(); i++){
+									Tern<Integer,Integer,Integer> tern = Config.getFormations().get(i);
+									out.println(Style.inputRadio("formation", i.toString(), 
+										formation.getFormation() != null && formation.getFormation().equals(i)) + 
+										tern.getFirst() + " - " + tern.getSecond() + " - " + tern.getThird() + "<br>");
+								}
+								out.println("<h3>Difensori</h3>");
+								out.println(radioButtonPlayers(
+										GenericUtilities.getPlayersListByRule(hiredPlayers,'D'),
+										"def","idDef",formation.getDef(),formation.getResDef()));
+								out.println("<h3>Centrocampisti</h3>");
+								out.println(radioButtonPlayers(
+										GenericUtilities.getPlayersListByRule(hiredPlayers,'C'),
+										"cen","idCen",formation.getCen(),formation.getResCen()));
+								out.println("<h3>Attaccanti</h3>");
+								out.println(radioButtonPlayers(
+										GenericUtilities.getPlayersListByRule(hiredPlayers,'A'),
+										"att","idAtt",formation.getAtt(),formation.getResAtt()));
+								out.println("<h3>Portieri</h3>");								
+								out.println(radioButtonPlayers(
+										GenericUtilities.getPlayersListByRule(hiredPlayers,'P'),
+										"golkeep","idGolkeep",formation.getGolkeep(),formation.getResGolkeep()));
 								out.println(Style.hidden("day", did.toString()));
 								out.println(Style.hidden("team", team.getId().toString()));
 					
-								if(formationList.size() > 0){
+								// se esisteva già una formazione
+								if(!formation.isEmpty()){
 									out.println(Style.hidden("todo", "modformation"));								
 									out.println("<input type=\"submit\" value=\"Modifica formazione\">");
 								}else{
@@ -262,7 +279,7 @@ public class FormationHandling extends HttpServlet {
 								}
 								out.println("<input type=\"reset\">");	
 								out.println("</form>");
-							}else if(formationList.size() == 0){
+							}else if(formation.isEmpty()){
 								out.println(Style.alertMessage("La giornata è chiusa senza che la squadra "+
 									team.getName()+" abbia ricevuto una formazione."));
 							}
@@ -294,5 +311,37 @@ public class FormationHandling extends HttpServlet {
 			throws ServletException, IOException {
 		this.doGet(request, response);
 	}
+	
+	/**
+	 * metodo che restituisce il codice html di 3 radio button per ogni calciatore
+	 * @param players lista di calciatori
+	 * @param name nome dei gruppi di radio button
+	 * @return codice html dei radio button
+	 */
+	public String radioButtonPlayers(
+			List<PlayerEntity> players, String name, String nameHidden, 
+			List<Integer> selectedPlayers, List<Integer> reservePlayers){
+		StringBuffer code = new StringBuffer("<ul>\n");
+		// contatore per i nomi dei gruppi
+		Integer i = 1;
+		for(Iterator<PlayerEntity> it = players.iterator(); it.hasNext(); i++){
+			PlayerEntity p = it.next();
+			// flag giocatore selezionato
+			Boolean isSelected = selectedPlayers.contains(p.getId());
+			// flag giocatore riserva
+			Boolean isReserve = reservePlayers.contains(p.getId());
+			// flag giocatore non selezionato
+			Boolean isNotSelected = !isSelected && !isReserve;
+			String serialName = name+i.toString();
+			String serialHidden = nameHidden+i.toString();
+			code.append("<li>"+p.getName()+" - "+p.getTeam()+": ");	
+			code.append(Style.inputRadio(serialName, "2", isSelected)+"Titolare");
+			code.append(Style.inputRadio(serialName, "1", isReserve)+"Riserva");
+			code.append(Style.inputRadio(serialName, "0", isNotSelected)+"Panchina\n");
+			code.append(Style.hidden(serialHidden, p.getId().toString()));
+		}
+		code.append("</ul>\n");
+		return code.toString();
+	}	
 
 }

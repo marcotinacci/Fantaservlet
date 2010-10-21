@@ -39,6 +39,16 @@ public class GenericUtilities {
 		return (d != null);
 	}	
 	
+	public static Logger checkLoggedIn(HttpServletRequest req, HttpServletResponse resp)
+		throws IOException
+	{
+		Logger log = new Logger(req.getSession());
+		if(!log.isLogged()){
+			resp.sendRedirect("Login");
+		}
+		return log;
+	}	
+	
 	public static Logger checkLoggedIn(HttpServletRequest req, HttpServletResponse resp, Boolean isAdmin)
 		throws IOException
 	{

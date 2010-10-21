@@ -12,6 +12,7 @@ import entities.CalendarEntity;
 import entities.DayEntity;
 import entities.MatchEntity;
 import entities.TeamEntity;
+import exceptions.BadTeamsNumberException;
 
 public class CalendarGenerator {
 	private CalendarEntity calendar;

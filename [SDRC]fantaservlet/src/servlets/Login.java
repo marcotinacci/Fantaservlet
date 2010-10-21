@@ -12,10 +12,10 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import entities.UserEntity;
+import exceptions.BlankLoginInfoException;
+import exceptions.WrongLoginInputException;
 
-import login.BlankLoginInfoException;
 import login.Logger;
-import login.WrongLoginInputException;
 
 import view.Style;
 

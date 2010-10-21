@@ -47,6 +47,7 @@ public class AdminMenu extends HttpServlet {
 		items.add("<a href=\"AddReport\">Assegna i Voti</a>");
 		items.add("<a href=\"ImportPlayers\">Importa i Calciatori</a>");
 		items.add("<a href=\"ImportReports\">Importa i Voti</a>");
+		items.add("<a href=\"ChangePassword\">Modifica la Password</a>");		
 		items.add("<a href=\"Logout\">Logout</a>");
 		out.println(Style.showList(items, false));
 		out.println(Style.pageFooter(false));

@@ -1,4 +1,4 @@
-package login;
+package exceptions;
 
 /**
  * classe di eccezione lanciata da un'azione scorretta di login

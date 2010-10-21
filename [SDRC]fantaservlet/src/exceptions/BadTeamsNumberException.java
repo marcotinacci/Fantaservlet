@@ -1,4 +1,4 @@
-package calendargenerator;
+package exceptions;
 
 public class BadTeamsNumberException extends Exception {
 

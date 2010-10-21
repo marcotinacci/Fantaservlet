@@ -82,7 +82,7 @@ public class ImportReports extends HttpServlet {
 				    }
 				}
 				// per ogni report
-				for(Iterator<ReportEntity> it = lists.first.iterator(); it.hasNext();){
+				for(Iterator<ReportEntity> it = lists.getFirst().iterator(); it.hasNext();){
 					ReportEntity rep = it.next();
 					// aggiorna i dati con il codice della giornata
 					rep.setDay(did);
@@ -99,7 +99,7 @@ public class ImportReports extends HttpServlet {
 					}
 				}
 				// per ogni giudge
-				for(Iterator<GiudgeEntity> it = lists.second.iterator(); it.hasNext();){
+				for(Iterator<GiudgeEntity> it = lists.getSecond().iterator(); it.hasNext();){
 					GiudgeEntity rep = it.next();
 					// aggiorna i dati con il codice della giornata
 					rep.setDay(did);

@@ -13,12 +13,12 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import calendargenerator.BadTeamsNumberException;
 import calendargenerator.CalendarGenerator;
 import dataconnection.MySQLConnection;
 
 import entities.CalendarEntity;
 import entities.ChampionshipEntity;
+import exceptions.BadTeamsNumberException;
 
 import utils.BeanUtilities;
 import utils.GenericUtilities;

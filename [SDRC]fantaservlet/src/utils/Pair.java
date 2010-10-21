@@ -7,8 +7,8 @@ package utils;
  * @param <S> secondo elemento
  */
 public class Pair<F,S> {
-	public F first;
-	public S second;
+	private F first;
+	private S second;
 
 	public Pair(F first, S second){
 		this.first = first;

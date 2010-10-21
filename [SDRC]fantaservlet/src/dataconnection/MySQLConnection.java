@@ -133,6 +133,22 @@ public class MySQLConnection {
 		preparedStatement.setBoolean(3, user.isAdmin());		
 		preparedStatement.executeUpdate();
 	}
+	
+	/**
+	 * metodo che modifica la password di un utente
+	 * @param uid id utente
+	 * @param newPassword nuova password
+	 * @throws SQLException sollevata quando la query fallisce
+	 */
+	public void updatePassword(Integer uid, String newPassword) 
+		throws SQLException{
+		// query di modifica password
+		preparedStatement = connection.prepareStatement(
+			"UPDATE Utente SET Password = ? WHERE idUtente = ?");
+		preparedStatement.setString(1, newPassword);
+		preparedStatement.setInt(2, uid);		
+		preparedStatement.executeUpdate();		
+	}	
 
 	/**
 	 * metodo che restituisce i campionati
@@ -740,7 +756,7 @@ public class MySQLConnection {
 	public FormationEntity getFormation(Integer tid, Integer did) throws SQLException{
 		// query di selezione degli schieramenti 
 		preparedStatement = connection.prepareStatement(
-			"SELECT Convocazione_idConvocazione, idCalciatore, Ruolo " +
+			"SELECT Convocazione_idConvocazione, idCalciatore, Ruolo, Riserva " +
 			"FROM Schieramento INNER JOIN Convocazione ON idConvocazione = Convocazione_idConvocazione " +
 			"INNER JOIN Calciatore ON idCalciatore = Calciatore_idCalciatore " +
 			"WHERE Squadra_idSquadra = ? AND Giornata_idGiornata = ?");
@@ -754,22 +770,31 @@ public class MySQLConnection {
 		List<Integer> lCen = new ArrayList<Integer>();
 		List<Integer> lDef = new ArrayList<Integer>();
 		List<Integer> lGolkeep = new ArrayList<Integer>();
+		List<Integer> lResAtt = new ArrayList<Integer>();
+		List<Integer> lResCen = new ArrayList<Integer>();
+		List<Integer> lResDef = new ArrayList<Integer>();
+		List<Integer> lResGolkeep = new ArrayList<Integer>();		
 		// per ogni record
 		while(res.next()){
 			// dividi i calciatori della formazione per ruolo
 			char rule = res.getString("Ruolo").charAt(0);
+			Boolean reserve = res.getBoolean("Riserva");
 			switch (rule) {
 			case 'P': // portier
-				lGolkeep.add(res.getInt("idCalciatore"));
+				if(reserve) lResGolkeep.add(res.getInt("idCalciatore"));
+				else lGolkeep.add(res.getInt("idCalciatore"));
 				break;
 			case 'D': // difensore
-				lDef.add(res.getInt("idCalciatore"));				
+				if(reserve) lResDef.add(res.getInt("idCalciatore"));
+				else lDef.add(res.getInt("idCalciatore"));	
 				break;
 			case 'C': // centrocampista
-				lCen.add(res.getInt("idCalciatore"));				
+				if(reserve) lResCen.add(res.getInt("idCalciatore"));
+				else lCen.add(res.getInt("idCalciatore"));				
 				break;
 			case 'A': // attaccante
-				lAtt.add(res.getInt("idCalciatore"));				
+				if(reserve) lResAtt.add(res.getInt("idCalciatore")); 
+				else lAtt.add(res.getInt("idCalciatore"));
 				break;				
 			default: // non esistono altri ruoli
 				// TODO lancia eccezione
@@ -777,11 +802,12 @@ public class MySQLConnection {
 			}
 		}
 		FormationEntity formation = new FormationEntity(
-			(Integer[])lAtt.toArray(new Integer[lAtt.size()]), 
-			(Integer[])lCen.toArray(new Integer[lCen.size()]), 
-			(Integer[])lDef.toArray(new Integer[lDef.size()]), 
-			(Integer[])lGolkeep.toArray(new Integer[lGolkeep.size()]), 
-			tid, did);
+				// titolari
+				lAtt, lCen, lDef, lGolkeep,
+				// riserve
+				lResAtt, lResCen, lResDef, lResGolkeep,
+				// squadra e giornata
+				tid, did);
 		return formation;
 	}		
 	
@@ -808,7 +834,47 @@ public class MySQLConnection {
 				res.getString("Ruolo").charAt(0),res.getString("Squadra")));
 		}
 		return lp;
-	}	
+	}
+	
+	/**
+	 * metodo che restituisce gli id di convocazione dei calciatori appartenenti a una
+	 * specifica squadra
+	 * @param players lista degli id dei calciatori
+	 * @param tid id della squadra
+	 * @return lista degli id di convocazione
+	 */
+	public List<Integer> getConvocationIds(List<Integer> players, Integer tid)
+			throws SQLException{
+		// query per il recupero degli id di convocazione dei calciatori
+		StringBuffer getConvIdQuery = new StringBuffer(
+			"SELECT idConvocazione FROM Convocazione " +
+			"WHERE Squadra_idSquadra = ?");	
+		
+		// inserisci tutti i placeholders
+		getConvIdQuery.append(" AND ( Calciatore_idCalciatore IN (?");
+		for(int i=0; i < players.size() - 1; i++){
+			getConvIdQuery.append(",?");				
+		}
+		// chiudi la query delle convocazioni
+		getConvIdQuery.append("))");
+
+		
+		// inserisci i valori nei placeholders della query delle convocazioni
+		preparedStatement = connection.prepareStatement(getConvIdQuery.toString());
+		// id squadra
+		preparedStatement.setInt(1, tid);
+		for(int i=0; i < players.size(); i++){
+			// id calciatori titolari
+			preparedStatement.setInt(i+2, players.get(i));
+		}
+		// esegui la query del recupero degli id di convocazione
+		ResultSet res = preparedStatement.executeQuery();
+		List<Integer> ids = new ArrayList<Integer>();
+		while(res.next()){
+			ids.add(res.getInt("idConvocazione"));
+		}
+		return ids;
+	}
 
 	/**
 	 * metodo che inserisce la formazione di una squadra di una giornata, si assume che i dati contenuti
@@ -817,61 +883,62 @@ public class MySQLConnection {
 	 * @throws SQLException sollevata quando la query fallisce
 	 */
 	public void insertFormation(FormationEntity formation) throws SQLException{
-		// TODO separare la query che recupera gli id di convocazione in un'altra funzione?
-		// query per il recupero degli id di convocazione dei calciatori
-		StringBuffer getConvIdQuery = new StringBuffer(
-			"SELECT idConvocazione FROM Convocazione " +
-			"WHERE Squadra_idSquadra = ?");		
-		List<Integer> players = formation.getPlayers();
-		// inserisci tutti i placeholders
-		// TODO il caso senza dati da inserire è veramente da gestire qui?
-		if(players.size() > 0){
-			getConvIdQuery.append(" AND ( Calciatore_idCalciatore IN (?");
-			for(int i=0; i < players.size()-1; i++){
-				getConvIdQuery.append(",?");				
-			}
-			// chiudi la query delle convocazioni
-			getConvIdQuery.append("))");
-		}
+
+		// lista dei titolari
+		List<Integer> players = new ArrayList<Integer>(); 
+		players.addAll(formation.getGolkeep());
+		players.addAll(formation.getAtt());
+		players.addAll(formation.getCen());
+		players.addAll(formation.getDef());
+		// lista delle riserve
+		List<Integer> reserves = new ArrayList<Integer>();
+		reserves.addAll(formation.getResGolkeep());
+		reserves.addAll(formation.getResAtt());
+		reserves.addAll(formation.getResCen());
+		reserves.addAll(formation.getResDef());
 		
-		// inserisci i valori nei placeholders della query delle convocazioni
-		preparedStatement = connection.prepareStatement(getConvIdQuery.toString());
-		// id squadra
-		preparedStatement.setInt(1, formation.getTeam());
-		for(int i=0; i < players.size(); i++){
-			// id calciatori
-			preparedStatement.setInt(i+2, players.get(i));
-		}
-		// esegui la query del recupero degli id di convocazione
-		ResultSet convIds = preparedStatement.executeQuery();
-		
-		// query per l'inserimento dei giocatori nello schieramento
-		StringBuffer insertFormationQuery = new StringBuffer(
-			"INSERT INTO Schieramento(Convocazione_idConvocazione , Giornata_idGiornata) VALUES ");		
-		// inserisci tutti i placeholders
-		// TODO il caso senza dati da inserire è veramente da gestire qui?
-		if(convIds.next()){
-			insertFormationQuery.append("(?,?)");
-			for(int i=0; i < players.size()-1; i++){
-				insertFormationQuery.append(",(?,?)");
+		if(players.size() + reserves.size() > 0){
+			
+			// id di convocazione dei titolari
+			List<Integer> titolarIds = getConvocationIds(players, formation.getTeam());
+			// id di convocazione delle riserve
+			List<Integer> reserveIds = getConvocationIds(reserves, formation.getTeam());
+	
+			// query per l'inserimento dei giocatori nello schieramento
+			StringBuffer insertFormationQuery = new StringBuffer("INSERT INTO Schieramento" +
+					"(Convocazione_idConvocazione , Giornata_idGiornata, Riserva) VALUES ");		
+			// inserisci tutti i placeholders
+			insertFormationQuery.append("(?,?,?)");
+			for(int i=0; i < titolarIds.size() + reserveIds.size() -1; i++){
+				insertFormationQuery.append(",(?,?,?)");
 			}
-		}
-		// inserisci i valori nei placeholders della query di inserimento dello schieramento
-		preparedStatement = connection.prepareStatement(insertFormationQuery.toString());
-		// flag per ripetere l'inserimento dei valori
-		boolean repeat = true;
-		// riavvolgi il result set
-		convIds.first();		
-		for(int i=0; repeat; i++){
-			// id convocazione
-			preparedStatement.setInt(i*2+1, convIds.getInt("idConvocazione"));			
-			// id giornata
-			preparedStatement.setInt(i*2+2, formation.getDay());
-			// vai al prossimo record
-			repeat = convIds.next();
-		}
-		// esegui l'inserimento dello schieramento
-		preparedStatement.executeUpdate();
+			
+			// inserisci i valori nei placeholders della query di inserimento dello schieramento
+			preparedStatement = connection.prepareStatement(insertFormationQuery.toString());
+			int numTitolars = titolarIds.size();
+			int numReserves = reserveIds.size();
+			// inserisci i valori dei titolari nei placeholders
+			for(int i=0; i < numTitolars; i++){
+				// id convocazione
+				preparedStatement.setInt(i*3+1, titolarIds.get(i));			
+				// id giornata
+				preparedStatement.setInt(i*3+2, formation.getDay());
+				// riserva
+				preparedStatement.setBoolean(i*3+3, false);		
+			}
+			// inserisci i valori delle riserve nei placeholders
+			for(int i=numTitolars; i < numTitolars+numReserves; i++){
+				// id convocazione
+				preparedStatement.setInt(i*3+1, reserveIds.get(i-numTitolars));			
+				// id giornata
+				preparedStatement.setInt(i*3+2, formation.getDay());
+				// riserva
+				preparedStatement.setBoolean(i*3+3, true);		
+			}		
+			
+			// esegui l'inserimento dello schieramento
+			preparedStatement.executeUpdate();
+		}	
 	}
 	
 	/**
@@ -1108,19 +1175,33 @@ public class MySQLConnection {
 	 * @throws SQLException sollevata quando la query fallisce
 	 */
 	public List<Pair<TeamEntity,Double>> getChampionshipResults(Integer cid) throws SQLException{
-		// la query recupera tutti i punteggi dei calciatori schierati dalle singole squadre
-		// viene poi fatta la somma per squadra e ritornata a coppie (nomesquadra, sommapunti)
-		// l'unico parametro impostato è l'id del campionato
-		// vengono raccolti solo i punteggi delle partite valutate!
+		/*
+		 *  la query recupera tutti i punteggi dei calciatori schierati dalle singole squadre
+		 *  viene poi fatta la somma per squadra e ritornata a coppie (nomesquadra, sommapunti),
+		 *  l'unico parametro impostato è l'id del campionato.
+		 *  Vengono raccolti solo i punteggi delle partite valutate!
+		 *  Il metodo somma i punti bonus/malus di ogni azione alla valutazione di giudizio 
+		 *  tramite l'unione dei punteggi ottenuti dalle query su Giudizio e su Pagella.
+		 */
 		String query = 
-			"SELECT " +
-				"S.idSquadra, " +
-				"S.Nome, " +
-				"S.Campionato_idCampionato, " +
-				"S.Utente_idUtente, " +
-				"SUM(V.Punteggio) AS Punti " +
+			"SELECT T.idSquadra, T.Nome, T.Campionato_idCampionato, T.Utente_idUtente, " +
+				"SUM(T.Punti) AS Punti " +
 			"FROM " +
-				"Campionato CH INNER JOIN " +
+				"(SELECT S.idSquadra, S.Nome, S.Campionato_idCampionato, S.Utente_idUtente, " +
+					"GD.Voto AS Punti " +
+				"FROM Campionato CH INNER JOIN " +
+					"Squadra S ON CH.idCampionato = S.Campionato_idCampionato INNER JOIN " +
+					"Convocazione C ON S.idSquadra = C.Squadra_idSquadra INNER JOIN " +
+					"Schieramento SC ON C.idConvocazione = SC.Convocazione_idConvocazione INNER JOIN " +
+					"Giornata G ON SC.Giornata_idGiornata = G.idGiornata INNER JOIN " +
+					"Calciatore CA ON CA.idCalciatore = C.Calciatore_idCalciatore INNER JOIN " +
+					"Giudizio GD ON CA.idCalciatore = GD.Calciatore_idCalciatore " +
+				"WHERE " +
+					"CH.idCampionato = ? AND G.Valutata = 1 " +
+			"UNION ALL " +
+				"SELECT S.idSquadra, S.Nome, S.Campionato_idCampionato, S.Utente_idUtente, " +
+				"V.Punteggio AS Punti " +
+			"FROM Campionato CH INNER JOIN " +
 				"Squadra S ON CH.idCampionato = S.Campionato_idCampionato INNER JOIN " +
 				"Convocazione C ON S.idSquadra = C.Squadra_idSquadra INNER JOIN " +
 				"Schieramento SC ON C.idConvocazione = SC.Convocazione_idConvocazione INNER JOIN " +
@@ -1128,14 +1209,13 @@ public class MySQLConnection {
 				"Calciatore CA ON CA.idCalciatore = C.Calciatore_idCalciatore INNER JOIN " +
 				"Pagella P ON P.Calciatore_idCalciatore = CA.idCalciatore INNER JOIN " +
 				"Voto V ON V.idVoto = P.Voto_idVoto " +
-			"WHERE " +
-				"CH.idCampionato = ? AND " +
-				"G.Valutata = 1 " +
-			"GROUP BY S.idSquadra " +
-			"ORDER BY Punti DESC, S.Nome ASC";
+				"INNER JOIN Giudizio GD ON CA.idCalciatore = GD.Calciatore_idCalciatore " +
+			"WHERE CH.idCampionato = ? AND G.Valutata = 1) T " +
+			"GROUP BY T.Nome";
 		preparedStatement = connection.prepareStatement(query);
 		// inserisci campionato
 		preparedStatement.setInt(1, cid);
+		preparedStatement.setInt(2, cid);		
 		// esegui query
 		ResultSet res = preparedStatement.executeQuery();
 		List<Pair<TeamEntity,Double>> pointList = new ArrayList<Pair<TeamEntity,Double>>();

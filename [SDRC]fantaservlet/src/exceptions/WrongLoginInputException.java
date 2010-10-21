@@ -1,4 +1,4 @@
-package login;
+package exceptions;
 
 /**
  * eccezione di formato dei dati errato nel login
@@ -9,7 +9,7 @@ public class WrongLoginInputException extends LoginException {
 
 	/**
 	 * il messaggio informa che l'errore riguarda i dati inseriti
-	 * @see login.LoginException#getMessage()
+	 * @see exceptions.LoginException#getMessage()
 	 */
 	@Override
 	public String getMessage() {

@@ -43,6 +43,7 @@ public class UserMenu extends HttpServlet {
 		items.add("<a href=\"FormationHandling\">Gestisci le Formazioni</a>");
 		items.add("<a href=\"ShowResults\">Visualizza i Risultati</a>");
 		items.add("<a href=\"PrintPDF\">Stampa PDF</a>");
+		items.add("<a href=\"ChangePassword\">Modifica la Password</a>");		
 		items.add("<a href=\"Logout\">Logout</a>");
 		out.println(Style.showList(items, false));
 		

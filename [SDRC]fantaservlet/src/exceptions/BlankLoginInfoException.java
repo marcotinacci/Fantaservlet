@@ -1,4 +1,4 @@
-package login;
+package exceptions;
 
 /**
  * eccezione che indica campi lasciati vuoti in un login
@@ -9,7 +9,7 @@ public class BlankLoginInfoException extends LoginException {
 
 	/**
 	 * metodo che informa che l'errore riguarda campi lasciati in bianco
-	 * @see login.LoginException#getMessage()
+	 * @see exceptions.LoginException#getMessage()
 	 */
 	@Override
 	public String getMessage() {

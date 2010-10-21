@@ -4,6 +4,8 @@ import java.sql.SQLException;
 import javax.servlet.http.HttpSession;
 import dataconnection.MySQLConnection;
 import entities.UserEntity;
+import exceptions.BlankLoginInfoException;
+import exceptions.WrongLoginInputException;
 
 /**
  * classe che gestisce la comunicazione con i dati di login nelle variabili di sessione

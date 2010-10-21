@@ -178,6 +178,7 @@ CREATE  TABLE IF NOT EXISTS `fsdb`.`Schieramento` (
   `idSchieramento` INT NOT NULL AUTO_INCREMENT ,
   `Convocazione_idConvocazione` INT NOT NULL ,
   `Giornata_idGiornata` INT NOT NULL ,
+  `Riserva` TINYINT(1) NOT NULL DEFAULT 0 ,
   PRIMARY KEY (`idSchieramento`) ,
   INDEX `fk_Schieramento_Convocazione1` (`Convocazione_idConvocazione` ASC) ,
   INDEX `fk_Schieramento_Giornata1` (`Giornata_idGiornata` ASC) ,
@@ -240,6 +241,7 @@ CREATE  TABLE IF NOT EXISTS `fsdb`.`Giudizio` (
   PRIMARY KEY (`idGiudizio`) ,
   INDEX `fk_Giudizio_Giornata1` (`Giornata_idGiornata` ASC) ,
   INDEX `fk_Giudizio_Calciatore1` (`Calciatore_idCalciatore` ASC) ,
+  UNIQUE INDEX `u_GiornataCalciatore` (`Giornata_idGiornata` ASC, `Calciatore_idCalciatore` ASC) ,
   CONSTRAINT `fk_Giudizio_Giornata1`
     FOREIGN KEY (`Giornata_idGiornata` )
     REFERENCES `fsdb`.`Giornata` (`idGiornata` )

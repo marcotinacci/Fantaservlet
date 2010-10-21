@@ -136,6 +136,18 @@ public class Style {
 	}
 
 	/**
+	 * stampa il codice html di un radio button
+	 * @param name nome
+	 * @param value valore
+	 * @param isChecked flag vero se il bottone è selezionato
+	 * @return codice html del radio button
+	 */
+	static public String inputRadio(String name, String value, Boolean isChecked){
+		return "<input type=\"radio\" name =\""+name+"\" value=\""+value+"\" "+
+			(isChecked?"checked":"")+">";
+	}
+	
+	/**
 	 * metodo che restituisce il codice html della classifica del campionato
 	 * @param list lista di coppie (squadra, punteggio)
 	 * @return codice html della classifica
