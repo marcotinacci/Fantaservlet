@@ -182,13 +182,15 @@ public class FormationHandling extends HttpServlet {
 				// determina se la giornata è aperta alle modifiche
 				List<DayEntity> openDays = 
 					dbc.getOpenDayOfChampionship(dbc.getChampionshipOfDay(did).getId());
-				// TODO si può fare il controllo direttamente durante il primo ciclo
-				List<Integer> openDaysId = new ArrayList<Integer>();
-				for(Iterator<DayEntity> it = openDays.iterator(); it.hasNext();){
-					openDaysId.add(((DayEntity)it.next()).getId());
-				}
 				// flag true se la giornata è aperta alle modifiche
-				Boolean isOpenDay = openDaysId.contains(did);
+				Boolean isOpenDay = false;
+				for(Iterator<DayEntity> it = openDays.iterator(); it.hasNext();){
+					if(((DayEntity)it.next()).getId().equals(did)){
+						isOpenDay = true;
+						break;
+					}
+				}
+
 				// stampa messaggio giornata chiusa
 				if(!isOpenDay)
 					out.println(Style.infoMessage("La giornata non &egrave; aperta alle modifiche"));

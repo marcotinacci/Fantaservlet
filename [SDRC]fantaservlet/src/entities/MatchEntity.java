@@ -1,6 +1,5 @@
 package entities;
 
-// TODO classe inutile?
 public class MatchEntity {
 	private Integer id;
 	private Integer idTeam1;

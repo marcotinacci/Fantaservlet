@@ -14,11 +14,11 @@ import javax.servlet.http.HttpServletResponse;
 
 import dataconnection.MySQLConnection;
 import entities.ChampionshipEntity;
-import entities.DayEntity;
 import entities.TeamEntity;
 
 import login.Logger;
 import utils.GenericUtilities;
+import utils.Match;
 import utils.Pair;
 import view.Style;
 
@@ -48,14 +48,18 @@ public class ShowResults extends HttpServlet {
 
 		// connessione al database		
 		MySQLConnection dbc = new MySQLConnection();
-		dbc.init();		
-
+		dbc.init();	
+		
 		// stampa la selezione del campionato
 		try{
 			out.println("<form name=\"showresults\" method=\"POST\">");
 			out.println("Scegli il campionato:");
 			out.println("<select name=\"champ\">");
-
+			/* 
+			 * TODO costruire il form della scelta del campionato in una funzione
+			 * ed eliminare la connessione al db dalla funzione principale 
+			 */
+			
 			// prendi i campionati a cui partecipa l'utente
 			List<ChampionshipEntity> lc = dbc.getChampionshipOfUser(logger.getUser().getId());
 			for(Iterator<ChampionshipEntity> it = lc.iterator(); it.hasNext(); ){
@@ -70,58 +74,24 @@ public class ShowResults extends HttpServlet {
 			out.println("Errore SQL: "+sqle.getMessage());
 		}
 
-		
 		// se è stato scelto un campionato
 		if(request.getParameter("champ") != null){
 			try{
-			// --- stampa le partite --- 
+				// id campionato
 				Integer cid = Integer.parseInt(request.getParameter("champ"));
-				// stampa titolo della sezione
-				out.println("<h2>Risultati delle partite</h2>");
-				// flag di chiusura campionato
-				Boolean isChampClosed = true;
-				// stringa di stampa delle giornate
-				StringBuffer printDays = new StringBuffer();
-				// recupera le giornate del campionato
-				List<DayEntity> days = dbc.getDayOfChampionship(cid);
-				// stampa l'inizio della tabella
-				printDays.append("<table border=\"1\">\n<tr><th>Giornata</th><th>Partita</th><th>Risultato</th></tr>");	
-				// per ogni giornata
-				for(Iterator<DayEntity> it = days.iterator(); it.hasNext();){
-					// giornata
-					DayEntity day = it.next();
-					// stampa la giornata
-					printDays.append("<tr><td rowspan=3>"+day.getFormatDate()+"</td>");
-					// recupera i dati delle partite della giornata
-					List<Pair<TeamEntity,TeamEntity>> matches = dbc.getMatchesOfDay(day.getId());
-					// per ogni partita
-					for(Iterator<Pair<TeamEntity,TeamEntity>> it2 = matches.iterator(); it2.hasNext();){
-						Pair<TeamEntity,TeamEntity> pair = it2.next();
-						// stampa i nomi delle squadre
-						printDays.append("<td>"+pair.getFirst().getName()+" - "+pair.getSecond().getName());
-						// stampa i gol segnati
-						if(day.isEvaluated()){
-							printDays.append("</td><td>"+dbc.getGolOfTeamInDay(pair.getFirst().getId(),day.getId())+
-								" - "+dbc.getGolOfTeamInDay(pair.getSecond().getId(),day.getId())+"</td></tr>");
-						}else{
-							printDays.append("</td><td>n.a.</td></tr>");
-							isChampClosed = false;
-						}
-					}
-				}
-				printDays.append("</table>");
-				out.println(printDays.toString());
+				// prendi la lista degli scontri
+				List<Match> lm = GenericUtilities.getListOfMatches(cid);
+				// --- stampa le partite ---
+				out.println(printMatches(lm, GenericUtilities.getNumOfTeams(lm)));
 				// --- stampa la classifica ---
-				out.println("<h2>Classifica "+ (isChampClosed? "definitiva" : "provvisoria") +"</h2>");
-				out.println(Style.showResults(dbc.getChampionshipResults(cid)));
+				out.println(printRanking(GenericUtilities.getRanking(lm),
+						GenericUtilities.isConcluse(lm)));
 			}catch (SQLException sqle) {
 				out.println(Style.alertMessage("Errore SQL: "+sqle.getMessage()));
 			}
 		}
-		
 		// chiudi connessione al database
 		dbc.destroy();
-		
 		out.println(Style.pageFooter());
 	}
 
@@ -131,6 +101,76 @@ public class ShowResults extends HttpServlet {
 	public void doPost(HttpServletRequest request, HttpServletResponse response) 
 			throws ServletException, IOException {
 		this.doGet(request, response);
+	}
+	
+	/**
+	 * metodo di stampa dei risultati delle partite di un campionato
+	 * @param matches lista delle partite del campionato
+	 * @param numTeams numero delle squadre che vi partecipano
+	 * @return risultati in codice html
+	 */
+	private String printMatches(List<Match> matches, Integer numTeams){
+		Integer matchPerDay = numTeams/2;
+		StringBuffer code = new StringBuffer();
+		// stampa titolo della sezione
+		code.append("<h2>Risultati delle partite</h2>");
+		// stampa l'inizio della tabella
+		code.append("<table border=\"1\">\n<tr><th>Giornata</th><th>Partita</th><th>Risultato</th><th>Punti</th></tr>");
+		Integer counter = 0;
+		for(Iterator<Match> it = matches.iterator();it.hasNext();counter = (counter+1) % matchPerDay){
+			Match match = it.next();
+			code.append("<tr>");
+			if(counter == 0){
+				code.append("<td rowspan="+matchPerDay.toString()+">"+match.getDay().getFormatDate()+"</td>");
+			}
+			// stampa i nomi delle squadre
+			code.append("<td>"+match.getTeam1().getName()+" - "+match.getTeam2().getName()+"</td>");
+			// stampa i gol segnati
+			if(match.getDay().isEvaluated()){
+				code.append("<td>"+
+					GenericUtilities.pointsToGol(match.getPointsTeam1()) + " - " +
+					GenericUtilities.pointsToGol(match.getPointsTeam2()) + "</td>");
+				code.append("<td>" + match.getPointsTeam1() + " - " + match.getPointsTeam2() +"</td></tr>");
+			}else{
+				code.append("<td>NA</td><td>NA</td></tr>");
+			}
+		}
+		code.append("</table>");		
+		return code.toString();
+	}
+	
+
+	
+	/**
+	 * metodo che stampa la classifica
+	 * @param ranks lista di coppie (squadra, punteggio)
+	 * @param isConcluse flag vero se la classifica è definitiva
+	 * @return classifica in codice html
+	 */
+	private String printRanking(List<Pair<TeamEntity,Integer>> ranks, Boolean isConcluse){
+		StringBuffer code = new StringBuffer();
+		code.append("<h2>Classifica "+ (isConcluse ? "definitiva" : "provvisoria")+"</h2>");
+		code.append("<table border=1><tr><th>Posizione</th><th>Squadra</th><th>Punteggio</th></tr>");
+		Integer position = 0;
+		Integer oldPoints = Integer.MAX_VALUE;
+		Integer newPoints;
+		for(Iterator<Pair<TeamEntity,Integer>> it = ranks.iterator(); it.hasNext();){
+			Pair<TeamEntity, Integer> coppia = it.next();
+			newPoints = coppia.getSecond();
+			// se non è un parimerito avanza di posizione
+			if(newPoints < oldPoints){
+				oldPoints = newPoints;
+				position++;
+			}
+			// stampa la posizione
+			code.append("<tr><td>"+position+"</td>\n");
+			// stampa il nome della squadra
+			code.append("<td>"+coppia.getFirst().getName()+"</td>\n");
+			// stampa il punteggio
+			code.append("<td>"+newPoints+"</td></tr>\n");
+		}
+		code.append("</table>");
+		return code.toString();		
 	}
 
 }

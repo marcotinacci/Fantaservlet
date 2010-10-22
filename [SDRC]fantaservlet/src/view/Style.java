@@ -4,11 +4,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import utils.Pair;
-
 import entities.DayEntity;
 import entities.PlayerEntity;
-import entities.TeamEntity;
 
 public class Style {
 	static public String successMessage(String msg){
@@ -113,7 +110,8 @@ public class Style {
 	 * @param selectedPlayers lista dei giocatori selezionati
 	 * @return codice html della select dei calciatori
 	 */
-	static public String selectPlayers(List<PlayerEntity> players, String name, List<Integer> selectedPlayers){		
+	static public String selectPlayers(List<PlayerEntity> players, String name, 
+			List<Integer> selectedPlayers){		
 		StringBuffer code = new StringBuffer("<select name=\""+name+"\" multiple=\"multiple\">");
 		for(Iterator<PlayerEntity> it = players.iterator(); it.hasNext();){
 			PlayerEntity p = it.next();
@@ -145,25 +143,6 @@ public class Style {
 	static public String inputRadio(String name, String value, Boolean isChecked){
 		return "<input type=\"radio\" name =\""+name+"\" value=\""+value+"\" "+
 			(isChecked?"checked":"")+">";
-	}
-	
-	/**
-	 * metodo che restituisce il codice html della classifica del campionato
-	 * @param list lista di coppie (squadra, punteggio)
-	 * @return codice html della classifica
-	 */
-	static public String showResults(List<Pair<TeamEntity,Double>> list){
-		// TODO gestire pareggi
-		// TODO posizione squadra
-		StringBuffer code = 
-			new StringBuffer("<table border=1><tr><th>Squadra</th><th>Punteggio</th></tr>");
-		for(Iterator<Pair<TeamEntity,Double>> it = list.iterator(); it.hasNext();){
-			Pair<TeamEntity, Double> coppia = it.next();
-			code.append("<tr><td>"+coppia.getFirst().getName()+"</td>");
-			code.append("<td>"+coppia.getSecond()+"</td></tr>");
-		}
-		code.append("</table>");
-		return code.toString();
 	}
 	
 	/**

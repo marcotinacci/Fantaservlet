@@ -1136,36 +1136,83 @@ public class MySQLConnection {
 	}
 	
 	/**
-	 * metodo che restituisce il numero di gol della squadra specificando la giornata
+	 * metodo che restituisce il punteggio di una squadra nella giornata specificata
 	 * @param tid id della squadra
+	 * @param cid id del campionato
 	 * @param did id della giornata
-	 * @return numero di gol
+	 * @return punteggio
 	 * @throws SQLException sollevata quando la query fallisce
 	 */
-	public Integer getGolOfTeamInDay(Integer tid, Integer did) throws SQLException{
+	public Double getPointsOfTeamInDay(Integer tid, Integer cid, Integer did) 
+			throws SQLException{
+		/*
+		 *  la query recupera tutti i punteggi dei calciatori schierati dalle singole squadre
+		 *  viene poi fatta la somma per squadra e ritornata a coppie (nomesquadra, sommapunti),
+		 *  l'unico parametro impostato è l'id del campionato.
+		 *  Il metodo somma i punti bonus/malus di ogni azione alla valutazione di giudizio 
+		 *  tramite l'unione dei punteggi ottenuti dalle query su Giudizio e su Pagella.
+		 */		
 		String query = 
-			"SELECT " +
-				"COUNT(*) AS numeroGol " +
-			"FROM " +
-				"Pagella P INNER JOIN " +
-				"Voto V ON Voto_idVoto = V.idVoto INNER JOIN " +
-				"Calciatore CA ON P.Calciatore_idCalciatore = CA.idCalciatore " +
-				"INNER JOIN Convocazione CO ON CO.Calciatore_idCalciatore = CA.idCalciatore " +
+			"SELECT SUM(T.Punti) AS Punti " +
+		"FROM " +
+			"(SELECT S.idSquadra, S.Nome, S.Campionato_idCampionato, S.Utente_idUtente, " +
+				"GD.Voto AS Punti " +
+			"FROM Campionato CH INNER JOIN " +
+				"Squadra S ON CH.idCampionato = S.Campionato_idCampionato INNER JOIN " +
+				"Convocazione C ON S.idSquadra = C.Squadra_idSquadra INNER JOIN " +
+				"Schieramento SC ON C.idConvocazione = SC.Convocazione_idConvocazione INNER JOIN " +
+				"Giornata G ON SC.Giornata_idGiornata = G.idGiornata INNER JOIN " +
+				"Calciatore CA ON CA.idCalciatore = C.Calciatore_idCalciatore INNER JOIN " +
+				"Giudizio GD ON CA.idCalciatore = GD.Calciatore_idCalciatore " +
 			"WHERE " +
-				"V.Azione = ? AND " +
-				"CO.Squadra_idSquadra = ? " +
-				"AND P.Giornata_idGiornata = ?";
+				"CH.idCampionato = ? AND G.idGiornata = ? AND GD.Giornata_idGiornata = ? AND S.idSquadra = ? " +
+		"UNION ALL " +
+			"SELECT S.idSquadra, S.Nome, S.Campionato_idCampionato, S.Utente_idUtente, " +
+			"V.Punteggio AS Punti " +
+		"FROM Campionato CH INNER JOIN " +
+			"Squadra S ON CH.idCampionato = S.Campionato_idCampionato INNER JOIN " +
+			"Convocazione C ON S.idSquadra = C.Squadra_idSquadra INNER JOIN " +
+			"Schieramento SC ON C.idConvocazione = SC.Convocazione_idConvocazione INNER JOIN " +
+			"Giornata G ON SC.Giornata_idGiornata = G.idGiornata INNER JOIN " +
+			"Calciatore CA ON CA.idCalciatore = C.Calciatore_idCalciatore INNER JOIN " +
+			"Pagella P ON P.Calciatore_idCalciatore = CA.idCalciatore INNER JOIN " +
+			"Voto V ON V.idVoto = P.Voto_idVoto " +
+		"WHERE CH.idCampionato = ? AND G.idGiornata = ? AND P.Giornata_idGiornata = ? AND S.idSquadra = ? ) T " +
+		"GROUP BY T.Nome";			
+
 		preparedStatement = connection.prepareStatement(query);
-		// inserisci tipo di azione
-		preparedStatement.setString(1, "gol segnato");
-		// inserisci squadra
-		preparedStatement.setInt(2, tid);
+		// inserisci campionato
+		preparedStatement.setInt(1, cid);
+		preparedStatement.setInt(5, cid);
 		// inserisci giornata
-		preparedStatement.setInt(3, did);		
+		preparedStatement.setInt(2, did);
+		preparedStatement.setInt(3, did);
+		preparedStatement.setInt(6, did);
+		preparedStatement.setInt(7, did);
+		// inserisci squadra
+		preparedStatement.setInt(4, tid);
+		preparedStatement.setInt(8, tid);		
 		// esegui query
 		ResultSet res = preparedStatement.executeQuery();
-		res.next();
-		return res.getInt("numeroGol");
+		if(res.next()){
+			return res.getDouble("Punti");
+		}else{
+			return 0.;
+		}
+	}
+	
+	/**
+	 * metodo che restituisce il punteggio di una squadra nella giornata specificata
+	 * @param tid id della squadra
+	 * @param did id della giornata
+	 * @return punteggio
+	 * @throws SQLException sollevata quando la query fallisce
+	 */
+	public Double getPointsOfTeamInDay(Integer tid, Integer did) 
+			throws SQLException{
+		// recupera l'id del campionato separatamente
+		Integer cid = getChampionshipOfDay(did).getId();
+		return getPointsOfTeamInDay(tid, cid, did);
 	}
 	
 	/**
@@ -1230,5 +1277,42 @@ public class MySQLConnection {
 				res.getDouble("Punti")));
 		}
 		return pointList;
+	}
+
+	/**
+	 * metodo che ritorna i calciatori non ancora valutati (giudizio da 1 a 10) in una certa
+	 * giornata
+	 * @param did id giornata
+	 * @return lista di giocatori non ancora valutati
+	 * @throws SQLException sollevata quando la query fallisce
+	 */
+	public List<PlayerEntity> getUnevaluatedPlayersInDay(Integer did) throws SQLException {
+		/*
+		 * Nella query esterna selezioniamo i calciatori nelle formazioni della giornata, poi controlliamo che
+		 * questi non siano tra i giocatori già valutati tramite la query interna, al termine si avranno
+		 * solo i calciatori che sono schierati ma ancora non valutati 
+		 */
+		String query = 
+			"SELECT CA.idCalciatore, CA.Nome, CA.Ruolo, CA.Squadra " +
+			"FROM " +
+				"Schieramento S INNER JOIN " +
+				"Convocazione CO ON S.Convocazione_idConvocazione = CO.idConvocazione INNER JOIN " +
+				"Calciatore CA ON CO.Calciatore_idCalciatore = CA.idCalciatore " +
+			"WHERE " +
+				"S.Giornata_idGiornata = ? AND CO.Calciatore_idCalciatore " +
+					"NOT IN (SELECT G.Calciatore_idCalciatore " +
+					"FROM Giudizio G WHERE G.Giornata_idGiornata = ?)";
+		preparedStatement = connection.prepareStatement(query);
+		// inserisci giornata
+		preparedStatement.setInt(1, did);
+		preparedStatement.setInt(2, did);		
+		// esegui query
+		ResultSet res = preparedStatement.executeQuery();
+		List<PlayerEntity> players = new ArrayList<PlayerEntity>();
+		while(res.next()){
+			players.add(new PlayerEntity(res.getInt("idCalciatore"),res.getString("Nome"),
+					res.getString("Ruolo").charAt(0),res.getString("Squadra")));
+		}		
+		return players;
 	}	
 }

@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import dataconnection.MySQLConnection;
 import entities.ChampionshipEntity;
+import entities.PlayerEntity;
 
 import utils.GenericUtilities;
 import view.Style;
@@ -64,8 +65,19 @@ public class DayHandling extends HttpServlet {
 		}else if(request.getParameter("evaluateday") != null){
 			// valuta la data selezionata
 			try {
-				dc.updateEvaluateDay(Integer.parseInt(request.getParameter("evaluateday")));
-				out.println(Style.successMessage("Data valutata"));					
+				// controlla se sono stati assegnati i giudizi a ogni calciatore della giornata
+				Integer evaluatedDay = Integer.parseInt(request.getParameter("evaluateday"));
+				List<PlayerEntity> unevaluatedPlayers = dc.getUnevaluatedPlayersInDay(evaluatedDay);
+				if(unevaluatedPlayers.size() == 0){
+					dc.updateEvaluateDay(evaluatedDay);
+					out.println(Style.successMessage("Data valutata"));					
+				}else{
+					// stampa i giocatori non valutati nel messaggio di errore
+					StringBuffer alertMess = new StringBuffer("La giornata non pu&ograve; essere valutata " +
+							"perch&eacute; i seguenti calciatori non sono stati valutati:\n");
+					alertMess.append(Style.showPlayersList(unevaluatedPlayers, false));
+					out.println(Style.alertMessage(alertMess.toString()));
+				}
 			} catch (SQLException e) {
 				out.println(Style.alertMessage("Errore SQL: "+e.getMessage()));
 			}
