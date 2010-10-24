@@ -90,7 +90,7 @@ public class PrintPDF extends HttpServlet {
 				for(Iterator<ChampionshipEntity> it = cl.iterator(); it.hasNext(); ){
 					ChampionshipEntity champ = it.next();
 					printChampTitle(champ,doc);
-					dbc.
+					
 					// --- stampa le rose di calciatori ---
 					if(printTeams){
 						// prendi la lista delle squadre
