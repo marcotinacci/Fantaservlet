@@ -30,6 +30,7 @@ import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Element;
 import com.itextpdf.text.Font;
 import com.itextpdf.text.FontFactory;
+import com.itextpdf.text.ListItem;
 import com.itextpdf.text.Phrase;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
@@ -38,6 +39,7 @@ import com.itextpdf.text.pdf.PdfWriter;
 import dataconnection.MySQLConnection;
 
 import entities.ChampionshipEntity;
+import entities.PlayerEntity;
 import entities.TeamEntity;
 
 /**
@@ -69,10 +71,15 @@ public class PrintPDF extends HttpServlet {
 			File file = new File("filePDF_"+logger.getUser().getId()+".pdf");
 			FileOutputStream os = new FileOutputStream(file);
 			String str = file.getAbsolutePath();
+			Boolean printTeams = request.getParameter("hire") != null;
+			Boolean printMatches = request.getParameter("match") != null;
+			Boolean printChampResults = request.getParameter("champ") != null;
 			// apri la connessione al database
 			MySQLConnection dbc = new MySQLConnection();
 			dbc.init();	
 			try {
+				
+				
 				// campionati a cui l'utente partecipa
 				List<ChampionshipEntity> cl = 
 					dbc.getChampionshipOfUser(logger.getUser().getId());				
@@ -82,16 +89,38 @@ public class PrintPDF extends HttpServlet {
 				// per ogni campionato
 				for(Iterator<ChampionshipEntity> it = cl.iterator(); it.hasNext(); ){
 					ChampionshipEntity champ = it.next();
-					// prendi la lista degli scontri
-					List<Match> lm = GenericUtilities.getListOfMatches(champ.getId());
-					if(lm.size() > 0){
-						// --- stampa le partite del campionato ---
-						doc = printMatches(lm, GenericUtilities.getNumOfTeams(lm), doc);
-						// --- stampa la classifica ---
-						doc = printRanking(GenericUtilities.getRanking(lm), 
-							GenericUtilities.isConcluse(lm), doc);						
+					printChampTitle(champ,doc);
+					dbc.
+					// --- stampa le rose di calciatori ---
+					if(printTeams){
+						// prendi la lista delle squadre
+						List<TeamEntity> teams = dbc.getTeamsOfChampionship(champ.getId());						
+						for(Iterator<TeamEntity> it2 = teams.iterator(); it2.hasNext();){
+							TeamEntity team = it2.next();
+							printHiring(
+								GenericUtilities.getPlayersListByRule(dbc.getHiring(team.getId()), 'D'), 
+								GenericUtilities.getPlayersListByRule(dbc.getHiring(team.getId()), 'C'),
+								GenericUtilities.getPlayersListByRule(dbc.getHiring(team.getId()), 'A'),
+								GenericUtilities.getPlayersListByRule(dbc.getHiring(team.getId()), 'P'),
+								team, doc);
+						}
 					}
-
+					
+					if(printMatches || printChampResults){
+						// prendi la lista degli scontri
+						List<Match> lm = GenericUtilities.getListOfMatches(champ.getId());
+						if(lm.size() > 0){
+							// --- stampa le partite del campionato ---
+							if(printMatches){
+								printMatches(lm, GenericUtilities.getNumOfTeams(lm), doc);								
+							}
+							// --- stampa la classifica ---
+							if(printChampResults){
+								printRanking(GenericUtilities.getRanking(lm), 
+										GenericUtilities.isConcluse(lm), doc);								
+							}
+						}
+					}
 				}			
 			}catch (DocumentException e) {
 				// TODO Auto-generated catch block
@@ -114,8 +143,9 @@ public class PrintPDF extends HttpServlet {
 			out.println(Style.pageHeader(TITLE));
 			
 			out.println("<form action=\"PrintPDF\" method=\"POST\">");
-			out.println("<input type=\"checkbox\"/ value=\"team\">Dati squadre<br/>");
-			out.println("<input type=\"checkbox\" value=\"champ\"/>Risultati campionato<br/>");
+			out.println("<input type=\"checkbox\"/ name=\"hire\">Dati squadre<br/>");
+			out.println("<input type=\"checkbox\" name=\"match\"/>Risultati partite<br/>");
+			out.println("<input type=\"checkbox\" name=\"champ\"/>Classifiche dei campionati<br/>");
 			out.println(Style.hidden("todo", "printPDF"));
 			out.println("<input type=\"submit\"/>");
 			out.println("</form>");
@@ -175,10 +205,9 @@ public class PrintPDF extends HttpServlet {
 	 * @param matches lista delle partite del campionato
 	 * @param numTeams numero delle squadre che vi partecipano
 	 * @param doc documento pdf su cui stampare
-	 * @return documento pdf aggiornato
 	 * @throws DocumentException sollevata quando si verificano errori di stampa su pdf
 	 */
-	private Document printMatches(List<Match> matches, Integer numTeams, Document doc) 
+	private void printMatches(List<Match> matches, Integer numTeams, Document doc) 
 			throws DocumentException{
 		// numero delle partite
 		Integer matchPerDay = numTeams / 2;
@@ -192,6 +221,7 @@ public class PrintPDF extends HttpServlet {
 		table.setWidths(new float[] {1,2,2,0.5f,0.5f,0.5f,0.5f});		
 		// stampa i titoli della tabella
 		cell = new PdfPCell(new Phrase("Giornata"));
+		cell.setHorizontalAlignment(Element.ALIGN_CENTER);
 		table.addCell(cell);
 		cell.setPhrase(new Phrase("Partita"));
 		cell.setColspan(2);
@@ -234,22 +264,20 @@ public class PrintPDF extends HttpServlet {
 		}
 
 		// inserisci il titolo nel documento
-		doc.add(new Phrase(new Chunk("Risultati delle partite", 
+		doc.add(new Phrase(new Chunk("\nRisultati delle partite", 
 				 FontFactory.getFont(FontFactory.HELVETICA, 16, Font.BOLD))));
 		// inserisci la tabella nel documento
 		doc.add(table);
-		return doc;
 	}
 
 	/**
 	 * metodo che stampa la classifica su pdf
 	 * @param ranks lista di coppie (squadra, punteggio)
 	 * @param isConcluse flag vero se la classifica è definitiva
-	 * @param doc documento pdf su cui stampare
-	 * @return documento pdf aggiornato 
+	 * @param doc documento pdf su cui stampare 
 	 * @throws DocumentException sollevata quando si verificano errori di stampa su pdf
 	 */
-	private Document printRanking(List<Pair<TeamEntity,Integer>> ranks, Boolean isConcluse, Document doc) 
+	private void printRanking(List<Pair<TeamEntity,Integer>> ranks, Boolean isConcluse, Document doc) 
 			throws DocumentException{
 		// tabella pdf, 3 colonne
 		PdfPTable table = new PdfPTable(3);
@@ -281,11 +309,74 @@ public class PrintPDF extends HttpServlet {
 		}
 		
 		// aggiungi il titolo al pdf
-		doc.add(new Phrase(new Chunk("Classifica "+ (isConcluse ? "definitiva" : "provvisoria"), 
+		doc.add(new Phrase(new Chunk("\nClassifica "+ (isConcluse ? "definitiva" : "provvisoria"), 
 				 FontFactory.getFont(FontFactory.HELVETICA, 16, Font.BOLD))));
 		// aggiungi la tabella al pdf
-
 		doc.add(table);
-		return doc;
 	}    
+	
+	private void printHiring(List<PlayerEntity> def, List<PlayerEntity> cen,
+			List<PlayerEntity> att, List<PlayerEntity> golkeep, TeamEntity team, Document doc) 
+			throws DocumentException{
+		// lista
+		com.itextpdf.text.List list;
+		// elemento della lista
+		ListItem item;
+		// calciatore
+		PlayerEntity player;
+		// stampa nome squadra
+		doc.add(new Phrase(new Chunk("\nSquadra "+team.getName(), 
+				 FontFactory.getFont(FontFactory.HELVETICA, 16, Font.BOLD))));		
+		// aggiungi i difensori
+		doc.add(new Phrase(new Chunk("\nDifensori", 
+				FontFactory.getFont(FontFactory.HELVETICA, 12, Font.BOLD))));
+		list = new com.itextpdf.text.List(com.itextpdf.text.List.UNORDERED);		
+		for(Iterator<PlayerEntity> it = def.iterator(); it.hasNext();){
+			player = it.next();
+			item = new ListItem(player.getName()+" - "+player.getTeam());
+			list.add(item);
+		}
+		doc.add(list);
+		// aggiungi i centrocampisti
+		doc.add(new Phrase(new Chunk("Centrocampisti", 
+				FontFactory.getFont(FontFactory.HELVETICA, 12, Font.BOLD))));
+		list = new com.itextpdf.text.List(com.itextpdf.text.List.UNORDERED);		
+		for(Iterator<PlayerEntity> it = cen.iterator(); it.hasNext();){
+			player = it.next();
+			item = new ListItem(player.getName()+" - "+player.getTeam());
+			list.add(item);
+		}
+		doc.add(list);		
+		// aggiungi gli attaccanti
+		doc.add(new Phrase(new Chunk("Attaccanti", 
+				FontFactory.getFont(FontFactory.HELVETICA, 12, Font.BOLD))));
+		list = new com.itextpdf.text.List(com.itextpdf.text.List.UNORDERED);		
+		for(Iterator<PlayerEntity> it = att.iterator(); it.hasNext();){
+			player = it.next();
+			item = new ListItem(player.getName()+" - "+player.getTeam());
+			list.add(item);
+		}
+		doc.add(list);
+		// aggiungi i portieri
+		doc.add(new Phrase(new Chunk("Portieri", 
+				FontFactory.getFont(FontFactory.HELVETICA, 12, Font.BOLD))));
+		list = new com.itextpdf.text.List(com.itextpdf.text.List.UNORDERED);		
+		for(Iterator<PlayerEntity> it = golkeep.iterator(); it.hasNext();){
+			player = it.next();
+			item = new ListItem(player.getName()+" - "+player.getTeam());
+			list.add(item);
+		}
+		doc.add(list);
+	}
+	
+	/**
+	 * metodo che stampa il titolo di un campionato
+	 * @param champ campionato
+	 * @param doc documento su cui stampare
+	 * @throws DocumentException
+	 */
+	private void printChampTitle(ChampionshipEntity champ, Document doc) throws DocumentException{
+		doc.add(new Phrase(new Chunk("\nCampionato "+champ.getName(), 
+				FontFactory.getFont(FontFactory.HELVETICA, 18, Font.BOLD))));		
+	}
 }

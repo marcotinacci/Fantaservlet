@@ -812,6 +812,32 @@ public class MySQLConnection {
 	}		
 	
 	/**
+	 * metodo che ritorna la rosa di calciatori (convocazione) di una certa squadra 
+	 * @param tid id della squadra
+	 * @return lista di calciatori convocati
+	 * @throws SQLException sollevata quando la query fallisce
+	 */
+	public List<PlayerEntity> getHiring(Integer tid) throws SQLException{
+		// query di selezione delle convocazioni 
+		preparedStatement = connection.prepareStatement(
+			"SELECT idCalciatore, Nome, Ruolo, Squadra " +
+			"FROM Convocazione INNER JOIN Calciatore ON idCalciatore = Calciatore_idCalciatore " +
+			"WHERE Squadra_idSquadra = ?");
+		// inserisci l'id della squadra
+		preparedStatement.setInt(1, tid);
+		// esegui la query
+		ResultSet res = preparedStatement.executeQuery();
+
+		// crea la lista di calciatori
+		List<PlayerEntity> players = new ArrayList<PlayerEntity>();
+		while(res.next()){
+			players.add(new PlayerEntity(res.getInt("idCalciatore"), res.getString("Nome"),
+					res.getString("Ruolo").charAt(0),res.getString("Squadra")));
+		}
+		return players;
+	}
+	
+	/**
 	 * metodo che restituisce i giocatori convocati di una squadra
 	 * @param tid id della squadra
 	 * @return lista dei giocatori convocati

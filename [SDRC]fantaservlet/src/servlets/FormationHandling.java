@@ -208,31 +208,16 @@ public class FormationHandling extends HttpServlet {
 							FormationEntity formation = dbc.getFormation(team.getId(), did);
 							if(!formation.isEmpty()){
 								// --- formazione attuale ---
-								// recupera i dati dei calciatori nella formazione
-								out.println("<p>La formazione della squadra <b>"+team.getName()+
-									"</b> &egrave; la seguente:</p>");
-								out.println("<ul>");
-								out.println("<li><b>Modulo:</b> "+
-									formation.getDef().size()+ " - "+
-									formation.getCen().size()+ " - "+
-									formation.getAtt().size());
-								out.println("<li><b>Difensori Titolari:</b>"+
-									Style.showPlayersList(dbc.getPlayersById(formation.getDef()),false));
-								out.println("<li><b>Difensori Riserve:</b>"+
-										Style.showPlayersList(dbc.getPlayersById(formation.getResDef()),false));								
-								out.println("<li><b>Centrocampisti Titolari:</b>"+
-									Style.showPlayersList(dbc.getPlayersById(formation.getCen()),false));
-								out.println("<li><b>Centrocampisti Riserve:</b>"+
-										Style.showPlayersList(dbc.getPlayersById(formation.getResCen()),false));	
-								out.println("<li><b>Attaccanti Titolari:</b>"+
-										Style.showPlayersList(dbc.getPlayersById(formation.getAtt()),false));								
-								out.println("<li><b>Attaccanti Riserve:</b>"+
-									Style.showPlayersList(dbc.getPlayersById(formation.getResAtt()),false));		
-								out.println("<li><b>Portiere Titolare:</b>"+
-									Style.showPlayersList(dbc.getPlayersById(formation.getGolkeep()),false));
-								out.println("<li><b>Portiere Riserva:</b>"+
-										Style.showPlayersList(dbc.getPlayersById(formation.getResGolkeep()),false));								
-								out.println("</ul>");
+								out.println(printFormation(
+										dbc.getPlayersById(formation.getDef()), 
+										dbc.getPlayersById(formation.getCen()), 
+										dbc.getPlayersById(formation.getAtt()), 
+										dbc.getPlayersById(formation.getGolkeep()), 
+										dbc.getPlayersById(formation.getResDef()),
+										dbc.getPlayersById(formation.getResCen()),
+										dbc.getPlayersById(formation.getResAtt()),
+										dbc.getPlayersById(formation.getResGolkeep()),
+										team));
 							}
 							
 							if(isOpenDay){
@@ -320,7 +305,7 @@ public class FormationHandling extends HttpServlet {
 	 * @param name nome dei gruppi di radio button
 	 * @return codice html dei radio button
 	 */
-	public String radioButtonPlayers(
+	private String radioButtonPlayers(
 			List<PlayerEntity> players, String name, String nameHidden, 
 			List<Integer> selectedPlayers, List<Integer> reservePlayers){
 		StringBuffer code = new StringBuffer("<ul>\n");
@@ -344,6 +329,49 @@ public class FormationHandling extends HttpServlet {
 		}
 		code.append("</ul>\n");
 		return code.toString();
-	}	
+	}
+	
+	/**
+	 * metodo che stampa il codice html della formazione
+	 * @param def lista difensori
+	 * @param cen lista centrocampisti
+	 * @param att lista attaccanti
+	 * @param golkeep lista portieri
+	 * @param resDef lista difensori riserve
+	 * @param resCen lista centrocampisti riserve
+	 * @param resAtt lista attaccanti riserve
+	 * @param resGolkeep lista portieri riserve
+	 * @param team squadra
+	 * @return codice html di stampa della formazione
+	 */
+	private String printFormation(List<PlayerEntity> def, List<PlayerEntity> cen,
+			List<PlayerEntity> att, List<PlayerEntity> golkeep, 
+			List<PlayerEntity> resDef, List<PlayerEntity> resCen, List<PlayerEntity> resAtt,
+			List<PlayerEntity> resGolkeep, TeamEntity team){
+		StringBuffer code = new StringBuffer();
+		code.append("<h3>Formazione</h3>");
+		
+		code.append("<ul>");
+		code.append("<li><b>Modulo:</b> "+ def.size() + " - " + 
+			cen.size() + " - " + att.size());
+		code.append("<li><b>Difensori Titolari:</b>"+
+			Style.showPlayersList(def,false));
+		code.append("<li><b>Difensori Riserve:</b>"+
+				Style.showPlayersList(resDef,false));
+		code.append("<li><b>Centrocampisti Titolari:</b>"+
+				Style.showPlayersList(cen,false));
+		code.append("<li><b>Centrocampisti Riserve:</b>"+
+				Style.showPlayersList(resCen,false));	
+		code.append("<li><b>Attaccanti Titolari:</b>"+
+				Style.showPlayersList(att,false));								
+		code.append("<li><b>Attaccanti Riserve:</b>"+
+				Style.showPlayersList(resAtt,false));		
+		code.append("<li><b>Portiere Titolare:</b>"+
+				Style.showPlayersList(golkeep,false));
+		code.append("<li><b>Portiere Riserva:</b>"+
+				Style.showPlayersList(resGolkeep,false));								
+		code.append("</ul>");
+		return code.toString();
+	}
 
 }

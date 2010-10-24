@@ -138,9 +138,7 @@ public class ShowResults extends HttpServlet {
 		code.append("</table>");		
 		return code.toString();
 	}
-	
 
-	
 	/**
 	 * metodo che stampa la classifica
 	 * @param ranks lista di coppie (squadra, punteggio)
