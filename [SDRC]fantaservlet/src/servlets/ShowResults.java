@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 import dataconnection.MySQLConnection;
 import entities.ChampionshipEntity;
 import entities.TeamEntity;
+import exceptions.BadFormException;
 
 import login.Logger;
 import utils.GenericUtilities;
@@ -52,9 +53,6 @@ public class ShowResults extends HttpServlet {
 		
 		// stampa la selezione del campionato
 		try{
-			out.println("<form name=\"showresults\" method=\"POST\">");
-			out.println("Scegli il campionato:");
-			out.println("<select name=\"champ\">");
 			/* 
 			 * TODO costruire il form della scelta del campionato in una funzione
 			 * ed eliminare la connessione al db dalla funzione principale 
@@ -62,14 +60,20 @@ public class ShowResults extends HttpServlet {
 			
 			// prendi i campionati a cui partecipa l'utente
 			List<ChampionshipEntity> lc = dbc.getChampionshipOfUser(logger.getUser().getId());
-			for(Iterator<ChampionshipEntity> it = lc.iterator(); it.hasNext(); ){
-				ChampionshipEntity c = it.next();
-				out.println(Style.option(c.getId().toString(),c.getName()));
-			}
-			
-			out.println("</select>");
-			out.println("<input type=\"submit\" value=\"Visualizza risultati\">");
-			out.println("</form>");			
+			if(lc.size() == 0){
+				out.println(Style.infoMessage("Non ci sono campionati"));
+			}else{
+				out.println("<form name=\"showresults\" method=\"POST\">");
+				out.println("Scegli il campionato:");
+				out.println("<select name=\"champ\">");				
+				for(Iterator<ChampionshipEntity> it = lc.iterator(); it.hasNext(); ){
+					ChampionshipEntity c = it.next();
+					out.println(Style.option(c.getId().toString(),c.getName()));
+				}
+				out.println("</select>");
+				out.println("<input type=\"submit\" value=\"Visualizza risultati\">");
+				out.println("</form>");					
+			}	
 		}catch (SQLException sqle) {
 			out.println("Errore SQL: "+sqle.getMessage());
 		}
@@ -82,12 +86,16 @@ public class ShowResults extends HttpServlet {
 				// prendi la lista degli scontri
 				List<Match> lm = GenericUtilities.getListOfMatches(cid);
 				// --- stampa le partite ---
-				out.println(printMatches(lm, GenericUtilities.getNumOfTeams(lm)));
+				Integer numTeams = GenericUtilities.getNumOfTeams(lm);
+				if(numTeams == 0) throw new BadFormException("Non ci sono giornate");
+				out.println(printMatches(lm, numTeams));
 				// --- stampa la classifica ---
 				out.println(printRanking(GenericUtilities.getRanking(lm),
 						GenericUtilities.isConcluse(lm)));
 			}catch (SQLException sqle) {
 				out.println(Style.alertMessage("Errore SQL: "+sqle.getMessage()));
+			} catch (BadFormException bfe) {
+				out.println(Style.infoMessage(bfe.getMessage()));
 			}
 		}
 		// chiudi connessione al database

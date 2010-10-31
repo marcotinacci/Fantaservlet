@@ -17,6 +17,7 @@ import entities.ChampionshipEntity;
 import entities.GroupHireEntity;
 import entities.PlayerEntity;
 import entities.TeamEntity;
+import exceptions.BadFormException;
 
 import utils.BeanUtilities;
 import utils.GenericUtilities;
@@ -58,7 +59,10 @@ public class HirePlayers extends HttpServlet {
 		if(ce.getId() != null){
 			try{
 				// recupera calciatori non assegnati nel campionato
-				List<PlayerEntity> lp = dbc.getAvailablePlayers(ce.getId());	
+				List<PlayerEntity> lp = dbc.getAvailablePlayers(ce.getId());
+				if(lp.size() == 0){
+					throw new BadFormException("Non ci sono calciatori da convocare");
+				}
 				// scelta giocatori
 				out.println("<form name=\"hireplayers\" method=\"POST\">");
 				out.println("Squadra: <select name=\"team\">");
@@ -137,22 +141,21 @@ public class HirePlayers extends HttpServlet {
 				out.println("</form>");
 				firstPage = false;
 			}catch(SQLException sqle){
-				// se c'è un errore segnalalo e stampa la pagina di selezione campionato
-				firstPage = true;
 				out.println(Style.alertMessage("Errore SQL: "+sqle.getMessage()));
+			} catch (BadFormException bfe) {
+				out.println(Style.infoMessage(bfe.getMessage()));
 			}	
 		}
 		// pagina scelta del campionato
 		if(firstPage){
-			// TODO controllare se esistono campionati
 			// acquisizione dati da request
 			GroupHireEntity ghe = new GroupHireEntity();
 			BeanUtilities.populateBean(ghe,request);	
 			// TODO controllare se si seleziona un campionato con solo squadre già completate
-			//se la rosa di calciatori è stata ricevuta
-			if(ghe.isComplete()){
-				// se la rosa è composta dal giusto numero di calciatori
-				if(ghe.isCorrect()){
+			//se la rosa di calciatori è stata ricevuta 
+			//e se la rosa è composta dal giusto numero di calciatori
+			if(!ghe.isEmpty()){
+				if(ghe.isComplete() && ghe.isCorrect()){
 					// inserisci i dati della convocazione
 					try {
 						dbc.insertHireGroup(ghe);

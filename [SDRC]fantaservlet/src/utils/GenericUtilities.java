@@ -182,6 +182,7 @@ public class GenericUtilities {
 	 * @return numero di squadre
 	 */
 	static public Integer getNumOfTeams(List<Match> matches){
+		if(matches == null || matches.size() == 0) return 0;
 		Integer dayId = matches.get(0).getDay().getId();
 		Integer counter;
 		for(counter = 1; counter < matches.size(); counter ++){

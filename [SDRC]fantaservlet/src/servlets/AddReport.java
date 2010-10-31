@@ -23,6 +23,7 @@ import entities.GiudgeEntity;
 import entities.PlayerEntity;
 import entities.ReportEntity;
 import entities.VoteEntity;
+import exceptions.BadFormException;
 
 /**
  * Servlet implementation class AddReport
@@ -91,93 +92,108 @@ public class AddReport extends HttpServlet {
 			List<ChampionshipEntity> lc = dbc.getChampionships();
 			List<PlayerEntity> lp = dbc.getPlayers();
 			
-			out.println("<h2>Aggiungi azione</h2>");
-			out.println("<form name=\"addreport\" method=\"POST\">");
-			out.println("Azione: <select name=\"vote\">");
+			if(lc.size() == 0) throw new BadFormException("Non ci sono campionati");
+			if(lp.size() == 0) throw new BadFormException("Non ci sono calciatori");
+		
+			StringBuffer code = new StringBuffer();			
+			code.append("<h2>Aggiungi azione</h2>");
+			code.append("<form name=\"addreport\" method=\"POST\">");
+			code.append("Azione: <select name=\"vote\">");
 			
 			// stampa i tipi di voti
 			for(Iterator<VoteEntity> it = lv.iterator();it.hasNext();){
 				VoteEntity v = it.next();	
-				out.println(Style.option(v.getId().toString(),v.getAction()));
+				code.append(Style.option(v.getId().toString(),v.getAction()));
 			}
 			
-			out.println("</select><br>");
-			out.println("Giornata: <select name=\"day\">");
+			code.append("</select><br>");
+			code.append("Giornata: <select name=\"day\">");
 			
+			Boolean noDays = true;
 			// stampa le giornate divise per campionato
 			for(Iterator<ChampionshipEntity> i = lc.iterator(); i.hasNext(); ){
 				// fissa un campionato c
 				ChampionshipEntity c = i.next();	
 				List<DayEntity> ld = dbc.getDayOfChampionship(c.getId());
 				if(ld.size() > 0){
+					noDays = false;
 					// stampa le giornate del campionato c
-					out.println(Style.optionGroup(c.getName()));
+					code.append(Style.optionGroup(c.getName()));
 					for(Iterator<DayEntity> j = ld.iterator();j.hasNext();){
 						DayEntity d = j.next();
-						out.println(Style.option(d.getId().toString(),d.getFormatDate()));		
+						code.append(Style.option(d.getId().toString(),d.getFormatDate()));		
 					}
 				}
 			}
 			
-			out.println("</select><br>");
-			out.println("Calciatore: <select name=\"player\">");
+			if(noDays) throw new BadFormException("Non ci sono giornate");
+			
+			code.append("</select><br>");
+			code.append("Calciatore: <select name=\"player\">");
 			
 			// stampa i calciatori
 			for(Iterator<PlayerEntity> it = lp.iterator();it.hasNext();){
 				PlayerEntity p = it.next();	
-				out.println(Style.option(p.getId().toString(),p.getName()));
+				code.append(Style.option(p.getId().toString(),p.getName()));
 			}
 			
-			out.println("</select><br>");
-			out.println(Style.hidden("todo", "insAction"));			
-			out.println("<input type=\"submit\" value=\"Inserisci azione\">");
-			out.println("</form>");
+			code.append("</select><br>");
+			code.append(Style.hidden("todo", "insAction"));			
+			code.append("<input type=\"submit\" value=\"Inserisci azione\">");
+			code.append("</form>");
 			
-			out.println("<h2>Aggiungi giudizio</h2>");	
-			out.println("<form name=\"addgiudge\" method=\"POST\">");
-			out.println("Giudizio: <select name=\"vote\">");
+			code.append("<h2>Aggiungi giudizio</h2>");	
+			code.append("<form name=\"addgiudge\" method=\"POST\">");
+			code.append("Giudizio: <select name=\"vote\">");
 			
 			// stampa i possibili giudizi
 			for(Double i = 1.; i <= 10; i+=0.5){
-				out.println(Style.option(i.toString(),i.toString()));
+				code.append(Style.option(i.toString(),i.toString()));
 			}
 			
-			out.println("</select><br>");
+			code.append("</select><br>");
 			// TODO fattorizzare giornata
-			out.println("Giornata: <select name=\"day\">");
+			code.append("Giornata: <select name=\"day\">");
 			
+			noDays = true;
 			// stampa le giornate divise per campionato
 			for(Iterator<ChampionshipEntity> i = lc.iterator(); i.hasNext(); ){
 				// fissa un campionato c
 				ChampionshipEntity c = i.next();	
 				List<DayEntity> ld = dbc.getDayOfChampionship(c.getId());
 				if(ld.size() > 0){
+					noDays = false;
 					// stampa le giornate del campionato c
-					out.println(Style.optionGroup(c.getName()));
+					code.append(Style.optionGroup(c.getName()));
 					for(Iterator<DayEntity> j = ld.iterator();j.hasNext();){
 						DayEntity d = j.next();
-						out.println(Style.option(d.getId().toString(),d.getFormatDate()));		
+						code.append(Style.option(d.getId().toString(),d.getFormatDate()));		
 					}
 				}
 			}
 			
-			out.println("</select><br>");
+			// TODO controllo ridondante, da eliminare con la fattorizzazione
+			if(noDays) throw new BadFormException("Non ci sono giornate");
+			
+			code.append("</select><br>");
 			// TODO fattorizzare calciatore
-			out.println("Calciatore: <select name=\"player\">");
+			code.append("Calciatore: <select name=\"player\">");
 			
 			// stampa i calciatori
 			for(Iterator<PlayerEntity> it = lp.iterator();it.hasNext();){
 				PlayerEntity p = it.next();	
-				out.println(Style.option(p.getId().toString(),p.getName()));
+				code.append(Style.option(p.getId().toString(),p.getName()));
 			}
 			
-			out.println("</select><br>");
-			out.println(Style.hidden("todo", "insGiudge"));
-			out.println("<input type=\"submit\" value=\"Inerisci giudizio\">");
-			out.println("</form>");			
-			
+			code.append("</select><br>");
+			code.append(Style.hidden("todo", "insGiudge"));
+			code.append("<input type=\"submit\" value=\"Inerisci giudizio\">");
+			code.append("</form>");
+			out.println(code);
 		} catch (SQLException sqle) {
 			out.println(Style.alertMessage("Errore SQL: "+ sqle.getMessage()));
+		} catch (BadFormException bfe) {
+			out.println(Style.alertMessage(bfe.getMessage()));
 		}			
 
 		out.println(Style.pageFooter());
@@ -192,5 +208,5 @@ public class AddReport extends HttpServlet {
 			throws ServletException, IOException {
 		this.doGet(request, response);
 	}
-
+	
 }

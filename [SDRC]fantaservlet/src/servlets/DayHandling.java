@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import dataconnection.MySQLConnection;
 import entities.ChampionshipEntity;
+import entities.DayEntity;
 import entities.PlayerEntity;
 
 import utils.GenericUtilities;
@@ -85,12 +86,16 @@ public class DayHandling extends HttpServlet {
 		
 		try{
 			List<ChampionshipEntity> lc = dc.getChampionships();
-			// stampa le giornate aperte divise per campionato
-			for(Iterator<ChampionshipEntity> i = lc.iterator();i.hasNext();){
-				// fissa un campionato c
-				ChampionshipEntity c = i.next();
-				out.println("<h2>Campionato: "+c.getName()+"</h2>");
-				out.println(Style.modDays(dc.getDayOfChampionship(c.getId())));
+			if(lc.size() == 0){
+				out.println(Style.infoMessage("Non ci sono campionati"));
+			}else{
+				// stampa le giornate aperte divise per campionato
+				for(Iterator<ChampionshipEntity> i = lc.iterator();i.hasNext();){
+					// fissa un campionato c
+					ChampionshipEntity c = i.next();
+					out.println("<h2>Campionato: "+c.getName()+"</h2>");
+					out.println(printModDays(dc.getDayOfChampionship(c.getId())));
+				}
 			}
 		}catch(SQLException sqle){
 			out.println("Errore SQL: "+sqle.getMessage());
@@ -106,5 +111,44 @@ public class DayHandling extends HttpServlet {
 			throws ServletException, IOException {
 		this.doGet(request, response);
 	}
+	
+	
+	/**
+	 * metodo che restituisce il codice html del form di modifica delle giornate
+	 * @param days lista delle giornate di un campionato
+	 * @return codice html dei form
+	 */
+	private String printModDays(List<DayEntity> days){
+		StringBuffer code = new StringBuffer();
+		if(days.size() > 0){
+			code.append("<table><tr><th>Giornata</th><th>Chiudi</th><th>Apri</th><th>Valuta</th></tr>");
+			// stampa le giornate del campionato c
+			for(Iterator<DayEntity> j = days.iterator(); j.hasNext(); ){
+				DayEntity d = j.next();
+				code.append("<tr><td>"+d.getFormatDate()+"</td><td>");
+				code.append("<form name=\"closeday\" method=\"get\">");
+				code.append("<input type=\"hidden\" name=\"closeday\" value=\""+d.getId()+"\">");
+				code.append("<input type=\"submit\" value=\"Chiudi\" "+(d.isClose()?"disabled":"")+">");
+				code.append("</form>");
+				code.append("</td><td>");
+				code.append("<form name=\"openday\" method=\"get\">");
+				code.append("<input type=\"hidden\" name=\"openday\" value=\""+d.getId()+"\">");
+				code.append("<input type=\"submit\" value=\"Apri\" "+
+					(d.isEvaluated() || !d.isClose()? "disabled" : "") +">");	
+				code.append("</form>");
+				code.append("</td><td>");
+				code.append("<form name=\"closeday\" method=\"get\">");
+				code.append("<input type=\"hidden\" name=\"evaluateday\" value=\""+d.getId()+"\">");
+				code.append("<input type=\"submit\" value=\"Valuta\" "+(d.isEvaluated()? "disabled" : "")+">");
+				code.append("</form>");
+				code.append("</td>");
+				code.append("</tr>");
+			}
+			code.append("</table>");
+		}else{
+			code.append(Style.infoMessage("Il campionato non &egrave; stato definito"));
+		}
+		return code.toString();
+	} 	
 
 }

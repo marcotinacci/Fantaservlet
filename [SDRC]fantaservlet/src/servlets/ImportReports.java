@@ -29,6 +29,7 @@ import entities.ChampionshipEntity;
 import entities.DayEntity;
 import entities.GiudgeEntity;
 import entities.ReportEntity;
+import exceptions.BadFormException;
 
 /**
  * Servlet implementation class ImportReports
@@ -122,17 +123,21 @@ public class ImportReports extends HttpServlet {
 		}
 
 		try {
-			// stampa il form di importazione dei voti
-			out.println("<form name=\"importreports\" method=\"POST\" " +
-				"enctype=\"multipart/form-data\">");
-			out.println("Giornata: <select name=\"day\" id=\"day\">");
-			
+			StringBuffer code = new StringBuffer();
 			// lista dei campionati
 			List<ChampionshipEntity> lc;
-	
 			lc = dbc.getChampionships();
+			if(lc.size() == 0){
+				throw new BadFormException("Non ci sono campionati");
+			}
 			// flag prima giornata
 			Boolean firstDay = true;
+			// flag zero giornate
+			Boolean noDays = true;
+			// stampa il form di importazione dei voti
+			code.append("<form name=\"importreports\" method=\"POST\" " +
+				"enctype=\"multipart/form-data\">");
+			code.append("Giornata: <select name=\"day\" id=\"day\">");			
 			// stampa le giornate aperte divise per campionato
 			for(Iterator<ChampionshipEntity> i = lc.iterator();i.hasNext();){
 				// fissa un campionato c
@@ -145,23 +150,30 @@ public class ImportReports extends HttpServlet {
 						DayEntity d = j.next();
 						if(firstDay){
 							// la prima giornata stampata deve essere selezionata
-							out.println(Style.option(d.getId().toString(),d.getFormatDate(),true));
+							code.append(Style.option(d.getId().toString(),d.getFormatDate(),true));
 							firstDay = false;
 						}else{
-							out.println(Style.option(d.getId().toString(),d.getFormatDate()));				
+							code.append(Style.option(d.getId().toString(),d.getFormatDate()));				
 						}
+						noDays = false;
 					}
 				}
 			}
+			if(noDays){
+				throw new BadFormException("Non ci sono giornate");
+			}
+			code.append("</select><br>");
+			code.append("File: <input type=\"file\" name=\"file\"><br>");
+			code.append("<input type=\"submit\" value=\"Importa\">");
+			code.append("</form>");
+			out.println(code);
 		} catch (SQLException e) {
 			out.println(Style.alertMessage("Errore SQL: "+e.getMessage()));
+		} catch (BadFormException bfe) {
+			out.println(Style.alertMessage(bfe.getMessage()));
 		}finally{
 			dbc.destroy();
 		}
-		out.println("</select><br>");
-		out.println("File: <input type=\"file\" name=\"file\"><br>");
-		out.println("<input type=\"submit\" value=\"Importa\">");
-		out.println("</form>");
 		
 		out.println(Style.pageFooter());
 	}

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import entities.DayEntity;
 import entities.PlayerEntity;
 
 public class Style {
@@ -144,43 +143,4 @@ public class Style {
 		return "<input type=\"radio\" name =\""+name+"\" value=\""+value+"\" "+
 			(isChecked?"checked":"")+">";
 	}
-	
-	/**
-	 * metodo che restituisce il codice html del form di modifica delle giornate
-	 * @param days lista delle giornate di un campionato
-	 * @return codice html dei form
-	 */
-	static public String modDays(List<DayEntity> days){
-		StringBuffer code = new StringBuffer();
-		if(days.size() > 0){
-			code.append("<table><tr><th>Giornata</th><th>Chiudi</th><th>Apri</th><th>Valuta</th></tr>");
-			// stampa le giornate del campionato c
-			for(Iterator<DayEntity> j = days.iterator(); j.hasNext(); ){
-				DayEntity d = j.next();
-				code.append("<tr><td>"+d.getFormatDate()+"</td><td>");
-				code.append("<form name=\"closeday\" method=\"get\">");
-				code.append("<input type=\"hidden\" name=\"closeday\" value=\""+d.getId()+"\">");
-				code.append("<input type=\"submit\" value=\"Chiudi\" "+(d.isClose()?"disabled":"")+">");
-				code.append("</form>");
-				code.append("</td><td>");
-				code.append("<form name=\"openday\" method=\"get\">");
-				code.append("<input type=\"hidden\" name=\"openday\" value=\""+d.getId()+"\">");
-				code.append("<input type=\"submit\" value=\"Apri\" "+
-					(d.isEvaluated() || !d.isClose()? "disabled" : "") +">");	
-				code.append("</form>");
-				code.append("</td><td>");
-				code.append("<form name=\"closeday\" method=\"get\">");
-				code.append("<input type=\"hidden\" name=\"evaluateday\" value=\""+d.getId()+"\">");
-				code.append("<input type=\"submit\" value=\"Valuta\" "+(d.isEvaluated()? "disabled" : "")+">");
-				code.append("</form>");
-				code.append("</td>");
-				code.append("</tr>");
-			}
-			code.append("</table>");
-		}else{
-			code.append(Style.infoMessage("Il campionato non &egrave; stato definito"));
-		}
-		return code.toString();
-	} 
-	
 }

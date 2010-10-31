@@ -94,4 +94,12 @@ public class GroupHireEntity {
 			getDef().length == 8 &&
 			getGolkeep().length == 3;
 	}
+	
+	public Boolean isEmpty(){
+		return !GenericUtilities.hasValue(getTeam()) &&
+			!GenericUtilities.hasValue(getAtt()) &&
+			!GenericUtilities.hasValue(getCen()) &&
+			!GenericUtilities.hasValue(getDef()) &&
+			!GenericUtilities.hasValue(getGolkeep());
+	}
 }

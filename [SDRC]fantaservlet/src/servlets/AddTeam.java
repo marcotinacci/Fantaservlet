@@ -56,11 +56,11 @@ public class AddTeam extends HttpServlet {
 			List<ChampionshipEntity> lc = dbc.getUndefinedChampionships();
 	
 			// controlla che esistano almeno un campionato e un utente giocatore
-			if(lpu == null || lc == null){
-				if(lpu == null){
+			if(lpu.size() == 0 || lc.size() == 0){
+				if(lpu.size() == 0){
 					out.println(Style.alertMessage("Non esistono utenti giocanti."));
 				}
-				if(lc == null){
+				if(lc.size() == 0){
 					out.println(Style.alertMessage("Non esistono campionati da definire disponibili."));
 				}
 			}else{

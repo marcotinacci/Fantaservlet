@@ -85,7 +85,9 @@ public class PrintPDF extends HttpServlet {
 					dbc.getChampionshipOfUser(logger.getUser().getId());				
 				// apri il documento PDF
 				PdfWriter.getInstance(doc,os);				
-				doc.open();		
+				doc.open();
+				doc.add(new Phrase(new Chunk("Fantaservlet: utente "+logger.getUser().getName(), 
+						 FontFactory.getFont(FontFactory.HELVETICA, 20, Font.BOLD))));
 				// per ogni campionato
 				for(Iterator<ChampionshipEntity> it = cl.iterator(); it.hasNext(); ){
 					ChampionshipEntity champ = it.next();
@@ -143,12 +145,13 @@ public class PrintPDF extends HttpServlet {
 			out.println(Style.pageHeader(TITLE));
 			
 			out.println("<form action=\"PrintPDF\" method=\"POST\">");
-			out.println("<input type=\"checkbox\"/ name=\"hire\">Dati squadre<br/>");
-			out.println("<input type=\"checkbox\" name=\"match\"/>Risultati partite<br/>");
-			out.println("<input type=\"checkbox\" name=\"champ\"/>Classifiche dei campionati<br/>");
+			out.println("<input type=\"checkbox\"/ name=\"hire\" checked>Dati squadre<br/>");
+			out.println("<input type=\"checkbox\" name=\"match\"/ checked>Risultati partite<br/>");
+			out.println("<input type=\"checkbox\" name=\"champ\"/ checked>Classifiche dei campionati<br/>");
 			out.println(Style.hidden("todo", "printPDF"));
 			out.println("<input type=\"submit\"/>");
 			out.println("</form>");
+			out.println(Style.pageFooter());
 		}
 	}
 
@@ -218,7 +221,7 @@ public class PrintPDF extends HttpServlet {
 		table.getDefaultCell().setHorizontalAlignment(Element.ALIGN_CENTER);
 		table.getDefaultCell().setVerticalAlignment(Element.ALIGN_MIDDLE);
 		table.setWidthPercentage(100);
-		table.setWidths(new float[] {1,2,2,0.5f,0.5f,0.5f,0.5f});		
+		table.setWidths(new float[] {1,2,2,0.5f,0.5f,0.5f,0.5f});
 		// stampa i titoli della tabella
 		cell = new PdfPCell(new Phrase("Giornata"));
 		cell.setHorizontalAlignment(Element.ALIGN_CENTER);
@@ -282,9 +285,13 @@ public class PrintPDF extends HttpServlet {
 		// tabella pdf, 3 colonne
 		PdfPTable table = new PdfPTable(3);
 		// cella
-		//PdfPCell cell;
+		PdfPCell cell;
 		// aggiungi le celle di intestazione
-		table.setHeaderRows(1);		
+		table.setHeaderRows(1);
+		table.getDefaultCell().setHorizontalAlignment(Element.ALIGN_CENTER);
+		table.getDefaultCell().setVerticalAlignment(Element.ALIGN_MIDDLE);
+		table.setWidthPercentage(100);
+		table.setWidths(new float[] {0.2f,1,0.2f});		
 		table.addCell("Posizione");
 		table.addCell("Squadra");
 		table.addCell("Punteggio");
@@ -303,7 +310,9 @@ public class PrintPDF extends HttpServlet {
 			// stampa la posizione
 			table.addCell(position.toString());
 			// stampa il nome della squadra
-			table.addCell(coppia.getFirst().getName());
+			cell = new PdfPCell(new Phrase(coppia.getFirst().getName()));
+			cell.setHorizontalAlignment(Element.ALIGN_LEFT);
+			table.addCell(cell);
 			// stampa il punteggio
 			table.addCell(newPoints.toString());
 		}
