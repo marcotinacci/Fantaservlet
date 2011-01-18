@@ -223,11 +223,11 @@ public class FormationHandling extends HttpServlet {
 							if(isOpenDay){
 								// --- form inserimento formazione ---
 								if(!formation.isEmpty()){
-									out.println(
-										"<p>&Egrave; ancora possibile modificare la formazione: </p>");
+									out.println(Style.infoMessage(
+										"&Egrave; ancora possibile modificare la formazione: "));
 								}else{
-									out.println("<p>La formazione della squadra <b>"+
-										team.getName()+"</b> deve ancora essere inserita:</p>");
+									out.println(Style.infoMessage("La formazione della squadra <b>"+
+										team.getName()+"</b> deve ancora essere inserita: "));
 								}
 								out.println("<form name=\"formationhandling\" method=\"POST\">");
 								out.println("<h3>Modulo</h3>");

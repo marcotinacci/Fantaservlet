@@ -87,7 +87,7 @@ public class Login extends HttpServlet {
 		out.println("<input type=\"submit\" value=\"login\">");
 		out.println("</form>");	
 		
-		out.println(Style.pageFooter());
+		out.println(Style.pageFooter(false));
 	}
 
 	/**

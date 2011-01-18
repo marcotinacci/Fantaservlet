@@ -1,0 +1,84 @@
+@charset "UTF-8";
+/* CSS Document */
+
+body 
+{
+	font-family:tahoma;
+/*	text-shadow:10px 5px 5px #000000; */
+	background-image: url(images/grass.jpg); 
+	background-repeat: repeat;
+}
+
+A 
+{
+	color: #6dcbfb;
+	text-decoration: none;
+}
+
+H1 
+{
+	font-size:30px; font-family:verdana;
+}
+
+input.bottone {
+	background-image:url(images/submit.png);
+	width: 67px;
+	height: 32px;
+	border: none;
+	color: #dee4ff;
+	cursor: pointer;
+	-moz-border-radius: 5px 5px 5px 5px;
+	-webkit-border-radius: 5px 5px 5px 5px;
+}
+input.bottone:hover,
+input.bottone.hover 
+{
+	background-image: url(images/submitHover.png);
+}
+
+div.transbox
+{
+  	width:40%;
+  	margin:40px 60px;
+  	border:1px solid black;
+	padding-left:50px;
+	
+	-moz-border-radius: 5px 5px 5px 5px;
+	-webkit-border-radius: 5px 5px 5px 5px;
+	
+	/* colori box */
+	background-color: rgba(0, 0, 0, 0.9);
+	background: rgba(0, 0, 0, 0.9);
+	color: rgba(255, 255, 255, 0.9);
+	
+	/* ombra del box */
+	-moz-box-shadow: 10px 10px 5px #191919;
+	-webkit-box-shadow: 10px 10px 5px #191919;
+	box-shadow: 10px 10px 5px #191919;
+	
+	/* opacità del box */
+  	/* for IE */
+  	filter:alpha(opacity=60);
+  	/* CSS3 standard */
+  	opacity:1;
+	padding-right: 50px;
+}
+div.transbox p
+{
+	margin:30px 40px;
+}
+
+p.alert {
+	color: #ff7a6d;
+	font-style: italic;
+}
+
+p.info {
+	color: #fef585;
+	font-style: italic;
+}
+
+p.success {
+	color: #89fa9f;
+	font-style: italic;
+}

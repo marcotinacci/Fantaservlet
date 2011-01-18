@@ -45,7 +45,9 @@ public class Style {
 		"<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" " +
 		"\"http://www.w3.org/TR/html4/loose.dtd\">\n"+
 		"<html>\n<head>\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=ISO-8859-1\">\n" +
-		"<title>Fantaservlet : "+title+"</title>\n</head>\n<body>\n<h1>"+title+"</h1>";
+		"<link href=\"sdrc.css\" rel=\"stylesheet\" type=\"text/css\">\n" +
+		"<title>Fantaservlet : "+title+"</title>\n</head>\n<body>\n<div class=\"transbox\">\n<p>\n" +
+		"<h1>"+title+"</h1>";
 	}
 	
 	/**
@@ -64,9 +66,9 @@ public class Style {
 	 */
 	static public String pageFooter(Boolean hasLink){
 		if(hasLink)
-			return "<a href=\"Login\">Torna al menu</a></body></html>";
+			return "<hr><a href=\"Login\">Torna al menu</a>\n</p>\n</div>\n</body></html>";
 		else
-			return "</body></html>";
+			return "</p>\n</div>\n</body></html>";
 	}	
 	
 	/**
