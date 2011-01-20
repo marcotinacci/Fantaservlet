@@ -49,7 +49,7 @@ public class ChampionshipEntity {
 	public boolean isNameAvailable() throws SQLException{
 		// TODO gestire il metodo direttamente dalla connessione al database?
 		MySQLConnection dbc = new MySQLConnection();
-		dbc.init();
+		dbc.startup();
 		List<ChampionshipEntity> lc = dbc.getChampionships();
 		dbc.destroy();
 		for(Iterator<ChampionshipEntity> it = lc.listIterator(); it.hasNext();){
@@ -64,7 +64,7 @@ public class ChampionshipEntity {
 	public boolean hasUndefinedTeams() throws SQLException{
 		// TODO gestire il metodo direttamente dalla connessione al database?
 		MySQLConnection dbc = new MySQLConnection();
-		dbc.init();		
+		dbc.startup();		
 		List<TeamEntity> lte = dbc.getOpenTeamsOfChampionship(getId());
 		dbc.destroy();
 		return lte.size() > 0;

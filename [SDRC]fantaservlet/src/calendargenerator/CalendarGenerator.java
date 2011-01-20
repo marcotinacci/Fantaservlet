@@ -46,7 +46,7 @@ public class CalendarGenerator {
 		
 		// connessione al database
 		MySQLConnection dc = new MySQLConnection();
-		dc.init();
+		dc.startup();
 		// prendi la lista delle squadre
 		List<TeamEntity> lt = dc.getTeamsOfChampionship(calendar.getIdChampionship());
 		// numero squadre

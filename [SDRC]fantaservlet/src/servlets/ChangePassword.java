@@ -53,7 +53,7 @@ public class ChangePassword extends HttpServlet {
 				if(logger.getUser().getPassword().equalsIgnoreCase(old)){
 					if(user.isConfirmed()){
 						MySQLConnection dbc = new MySQLConnection();
-						dbc.init();
+						dbc.startup();
 						try{
 							// aggiorna la password nel database
 							dbc.updatePassword(logger.getUser().getId(), user.getPassword());

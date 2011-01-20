@@ -56,7 +56,7 @@ public class TeamEntity {
 
 	public boolean isAvailableName() throws SQLException{
 		MySQLConnection dbc = new MySQLConnection();
-		dbc.init();		
+		dbc.startup();		
 		List<TeamEntity> lt = dbc.getTeams();
 		dbc.destroy();
 		for(Iterator<TeamEntity> it = lt.listIterator(); it.hasNext();){

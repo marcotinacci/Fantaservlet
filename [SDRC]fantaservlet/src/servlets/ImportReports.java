@@ -57,7 +57,7 @@ public class ImportReports extends HttpServlet {
 		
 		//connessione al database (viene fatta anche se non si riceve un file per la stampa del form)
 		MySQLConnection dbc = new MySQLConnection();
-		dbc.init();
+		dbc.startup();
 		// controlla se la richiesta è un formato multipart 
 		if (ServletFileUpload.isMultipartContent(request))
 		{

@@ -156,7 +156,7 @@ public class UserEntity{
 	public boolean isAvailableName() throws SQLException {
 		// TODO passaggio connessione a database dall'esterno
 		MySQLConnection dbc = new MySQLConnection();
-		dbc.init();
+		dbc.startup();
 		List<UserEntity> lu = dbc.getUsers();
 		dbc.destroy();
 		for(Iterator<UserEntity> it = lu.listIterator(); it.hasNext();){

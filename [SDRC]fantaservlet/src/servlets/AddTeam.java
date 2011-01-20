@@ -47,7 +47,7 @@ public class AddTeam extends HttpServlet {
 		
 		// crea connessione al database
 		MySQLConnection dbc = new MySQLConnection();
-		dbc.init();
+		dbc.startup();
 		List<UserEntity> lpu;
 		try {
 			// lista utenti giocanti

@@ -56,7 +56,7 @@ public class FormationHandling extends HttpServlet {
 		
 		// connessione al database
 		MySQLConnection dbc = new MySQLConnection();
-		dbc.init();
+		dbc.startup();
 
 		// --- stampa le giornate ---
 		try {			
@@ -90,7 +90,7 @@ public class FormationHandling extends HttpServlet {
 			}
 			code.append("</select>\n");
 			code.append("<input type=\"hidden\" name=\"todo\" value=\"viewday\">\n");
-			code.append("<input type=\"submit\" value=\"Visualizza formazione\">\n");
+			code.append("<input type=\"submit\" value=\"Visualizza\">\n");
 			code.append("</form>\n");
 			if(anyDays){
 				out.println(code.toString());
@@ -259,10 +259,10 @@ public class FormationHandling extends HttpServlet {
 								// se esisteva giˆ una formazione
 								if(!formation.isEmpty()){
 									out.println(Style.hidden("todo", "modformation"));								
-									out.println("<input type=\"submit\" value=\"Modifica formazione\">");
+									out.println("<input type=\"submit\" value=\"Modifica\">");
 								}else{
 									out.println(Style.hidden("todo", "insformation"));
-									out.println("<input type=\"submit\" value=\"Inserisci formazione\">");
+									out.println("<input type=\"submit\" value=\"Inserisci\">");
 								}
 								out.println("<input type=\"reset\">");	
 								out.println("</form>");

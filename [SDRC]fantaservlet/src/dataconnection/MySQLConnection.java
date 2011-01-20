@@ -2,6 +2,9 @@ package dataconnection;
 
 import entities.*;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -13,19 +16,20 @@ import java.util.List;
 import java.util.Properties;
 import java.sql.PreparedStatement;
 
+import javax.servlet.http.HttpServlet;
+
 import utils.Pair;
 
 /**
  * @author Michael
  * Questa classe offre i metodi di interazione col database mysql (insert, select, delete)
  */
-public class MySQLConnection {
+public class MySQLConnection extends HttpServlet {
 	
 	// driver mysql tramite Connector/J
 	private final String driver = "com.mysql.jdbc.Driver";
 	// percorso del database
-	// TODO definire tramite file di configurazione
-	protected final String url = "jdbc:mysql://localhost:3306/fsdb";
+	//protected String url = "jdbc:mysql://localhost:3306/fsdb";
 	// informazioni per l'accesso al database
 	protected Properties userInfo = new Properties();
 	// connessione di rete al database
@@ -38,18 +42,31 @@ public class MySQLConnection {
 	/**
 	 * Inizializzazione della connessione al database 
 	 */
-	public void init(){
-		// definisci i dati di accesso al database
-		// TODO definire tramite file di configurazione
-		userInfo.put("user", "root");
-		userInfo.put("password", "");
+	public void startup(){
+		// Read properties file.
+		getServletContext().getRealPath("/");
+		FileInputStream fis;
 		try {
+			fis = new FileInputStream(getServletContext().getRealPath("/"));
+			Properties prop = new Properties();
+			prop.load(fis);
+			// definisci i dati di accesso al database
+			userInfo.put("user", prop.getProperty("user"));
+			userInfo.put("password", prop.getProperty("password"));
 			// Carica il driver, non è necessario in Java 6
 			Class.forName(driver);
 			// Stabilisci la connessione al database
-			connection = DriverManager.getConnection(url,userInfo);
-		} catch(Exception e) {
-			System.err.println("Errore di connessione: " + e);
+			connection = DriverManager.getConnection(
+				"jdbc:mysql://"+prop.getProperty("host") + ":" + 
+				prop.getProperty("port") + "/fsdb" ,userInfo);
+		} catch (FileNotFoundException fnfe) {
+			System.err.println("Error: " + fnfe);
+		} catch (IOException ioe) {
+			System.err.println("Error: " + ioe);
+		} catch (ClassNotFoundException cnfe) {
+			System.err.println("Error: " + cnfe);
+		} catch (SQLException sqle) {
+			System.err.println("Error: " + sqle);
 		}
 	}
 	

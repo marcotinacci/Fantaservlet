@@ -229,7 +229,7 @@ public class GenericUtilities {
 	static public List<Match> getListOfMatches(Integer cid) throws SQLException{
 		// connessione al database		
 		MySQLConnection dbc = new MySQLConnection();
-		dbc.init();			
+		dbc.startup();			
 		// composizione dei dati
 		List<Match> versus = new ArrayList<Match>();
 		// recupera le giornate del campionato

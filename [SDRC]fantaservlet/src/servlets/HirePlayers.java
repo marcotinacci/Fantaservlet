@@ -49,7 +49,7 @@ public class HirePlayers extends HttpServlet {
 		
 		// connessione al database
 		MySQLConnection dbc = new MySQLConnection();
-		dbc.init();
+		dbc.startup();
 		// acquisizione dati da request
 		ChampionshipEntity ce = new ChampionshipEntity();
 		BeanUtilities.populateBean(ce,request);
@@ -103,7 +103,8 @@ public class HirePlayers extends HttpServlet {
 				for(Iterator<PlayerEntity> it = lp.iterator();it.hasNext();){
 					PlayerEntity p = it.next();
 					if(p.isCen()){
-						out.println(Style.option(p.getId().toString(),p.getName()));	
+						out.println(Style.option(p.getId().toString(),p.getName() +
+							" - " + p.getTeam()));
 						count++;			
 					}
 				}

@@ -48,7 +48,7 @@ public class AddPlayer extends HttpServlet {
 			nameAvailable = player.isNameAvailable();
 			if(nameAvailable){
 				MySQLConnection dbc = new MySQLConnection();
-				dbc.init();		
+				dbc.startup();		
 				try {
 					dbc.insertPlayer(player);
 					// stampa avvenuto inserimento

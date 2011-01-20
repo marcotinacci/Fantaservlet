@@ -49,7 +49,7 @@ public class AddUser extends HttpServlet {
 		if(request.getParameter("todo") != null){
 			if(user.isComplete()){
 				MySQLConnection dbc = new MySQLConnection();
-				dbc.init();
+				dbc.startup();
 				try {
 					nameAvailable = user.isAvailableName();
 					confirmPassword = user.isConfirmed();

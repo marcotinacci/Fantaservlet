@@ -53,7 +53,7 @@ public class AddChampionship extends HttpServlet {
 				nameAvailable = champ.isNameAvailable();
 				if(nameAvailable){
 					MySQLConnection dbc = new MySQLConnection();
-					dbc.init();		
+					dbc.startup();		
 					dbc.insertChampionship(champ);
 					dbc.destroy();
 					// stampa avvenuto inserimento

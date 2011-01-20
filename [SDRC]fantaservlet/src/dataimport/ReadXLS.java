@@ -43,7 +43,7 @@ public class ReadXLS implements IReadFile {
 			
 			// connessione al database
 			MySQLConnection dbc = new MySQLConnection();
-			dbc.init();
+			dbc.startup();
 			
 			// salta la prima riga di titolo
 			rows.next();

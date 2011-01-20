@@ -76,7 +76,7 @@ public class PrintPDF extends HttpServlet {
 			Boolean printChampResults = request.getParameter("champ") != null;
 			// apri la connessione al database
 			MySQLConnection dbc = new MySQLConnection();
-			dbc.init();	
+			dbc.startup();	
 			try {
 				
 				

@@ -49,7 +49,7 @@ public class ShowResults extends HttpServlet {
 
 		// connessione al database		
 		MySQLConnection dbc = new MySQLConnection();
-		dbc.init();	
+		dbc.startup();	
 		
 		// stampa la selezione del campionato
 		try{

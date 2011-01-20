@@ -1,1 +1,1 @@
-<% response.sendRedirect("Login"); %>
+<% response.sendRedirect("Login");%>

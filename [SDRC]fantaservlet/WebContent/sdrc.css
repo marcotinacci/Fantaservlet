@@ -20,25 +20,9 @@ H1
 	font-size:30px; font-family:verdana;
 }
 
-input.bottone {
-	background-image:url(images/submit.png);
-	width: 67px;
-	height: 32px;
-	border: none;
-	color: #dee4ff;
-	cursor: pointer;
-	-moz-border-radius: 5px 5px 5px 5px;
-	-webkit-border-radius: 5px 5px 5px 5px;
-}
-input.bottone:hover,
-input.bottone.hover 
-{
-	background-image: url(images/submitHover.png);
-}
-
 div.transbox
 {
-  	width:40%;
+	min-width: 40%;
   	margin:40px 60px;
   	border:1px solid black;
 	padding-left:50px;
@@ -62,7 +46,41 @@ div.transbox
   	/* CSS3 standard */
   	opacity:1;
 	padding-right: 50px;
+	display: table;
 }
+
+input[type=button], 
+input[type=reset],
+input[type=submit] 
+{
+	background-image:url(images/submit.png);
+	width: 67px;
+	height: 32px;
+	border: none;
+	color: #dee4ff;
+	cursor: pointer;
+	-moz-border-radius: 5px 5px 5px 5px;
+	-webkit-border-radius: 5px 5px 5px 5px;
+}
+
+input[type=button]:hover, 
+input[type=reset]:hover,
+input[type=submit]:hover,
+input[type=button].hover, 
+input[type=reset].hover,
+input[type=submit].hover
+{
+	background-image: url(images/submitHover.png);
+
+}
+
+form .disabledButton,
+form .disabledButton:hover
+{
+	background-image: none;
+	color: #777;
+}
+
 div.transbox p
 {
 	margin:30px 40px;
@@ -81,4 +99,28 @@ p.info {
 p.success {
 	color: #89fa9f;
 	font-style: italic;
+}
+
+td, th{
+	padding: 5px;
+	border-style: none;
+}
+
+table{
+	border-style: none;
+}
+
+tr:nth-of-type(odd) {
+  background-color: #24b1f9;
+}
+
+tr:nth-of-type(even) {
+  background-color: #0d6cd4;
+}
+
+table#dayHandle,
+table#dayHandle tr,
+table#dayHandle tr td{
+	background-color: transparent;
+	padding: 1px;
 }

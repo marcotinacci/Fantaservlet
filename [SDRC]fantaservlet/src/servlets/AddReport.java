@@ -51,7 +51,7 @@ public class AddReport extends HttpServlet {
 		
 		// assegnamento voto
 		MySQLConnection dbc = new MySQLConnection();
-		dbc.init();
+		dbc.startup();
 		String todo = request.getParameter("todo");
 		if(todo != null){
 			// richiesta di inserimento azione

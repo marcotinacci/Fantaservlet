@@ -55,7 +55,7 @@ public class ImportPlayers extends HttpServlet {
 			// importa i calciatori da file
 			IReadFile xls = new ReadXLS();
 			MySQLConnection dbc = new MySQLConnection();
-			dbc.init();
+			dbc.startup();
 			ServletFileUpload upload = new ServletFileUpload(new DiskFileItemFactory());
 			// interpreta l'unico parametro
 			FileItem item;

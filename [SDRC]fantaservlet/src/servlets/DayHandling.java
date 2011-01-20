@@ -45,7 +45,7 @@ public class DayHandling extends HttpServlet {
 		GenericUtilities.checkLoggedIn(request, response, true);
 		
 		MySQLConnection dc = new MySQLConnection();
-		dc.init();
+		dc.startup();
 		if(request.getParameter("closeday") != null){
 			// chiudi data selezionata
 			try {
@@ -121,25 +121,36 @@ public class DayHandling extends HttpServlet {
 	private String printModDays(List<DayEntity> days){
 		StringBuffer code = new StringBuffer();
 		if(days.size() > 0){
-			code.append("<table><tr><th>Giornata</th><th>Chiudi</th><th>Apri</th><th>Valuta</th></tr>");
+			code.append("<table id=\"dayHandle\" ><tr><th>Giornata</th><th>Chiudi</th><th>Apri</th><th>Valuta</th></tr>");
 			// stampa le giornate del campionato c
 			for(Iterator<DayEntity> j = days.iterator(); j.hasNext(); ){
 				DayEntity d = j.next();
 				code.append("<tr><td>"+d.getFormatDate()+"</td><td>");
 				code.append("<form name=\"closeday\" method=\"get\">");
 				code.append("<input type=\"hidden\" name=\"closeday\" value=\""+d.getId()+"\">");
-				code.append("<input type=\"submit\" value=\"Chiudi\" "+(d.isClose()?"disabled":"")+">");
+				if(d.isClose()){
+					code.append("<input type=\"submit\" value=\"Chiudi\" class=\"disabledButton\" disabled>");
+				}else{
+					code.append("<input type=\"submit\" value=\"Chiudi\">");
+				}
 				code.append("</form>");
 				code.append("</td><td>");
 				code.append("<form name=\"openday\" method=\"get\">");
 				code.append("<input type=\"hidden\" name=\"openday\" value=\""+d.getId()+"\">");
-				code.append("<input type=\"submit\" value=\"Apri\" "+
-					(d.isEvaluated() || !d.isClose()? "disabled" : "") +">");	
+				if(d.isEvaluated() || !d.isClose()){
+					code.append("<input type=\"submit\" value=\"Apri\" class=\"disabledButton\" disabled>");
+				}else{
+					code.append("<input type=\"submit\" value=\"Apri\">");
+				}
 				code.append("</form>");
 				code.append("</td><td>");
 				code.append("<form name=\"closeday\" method=\"get\">");
 				code.append("<input type=\"hidden\" name=\"evaluateday\" value=\""+d.getId()+"\">");
-				code.append("<input type=\"submit\" value=\"Valuta\" "+(d.isEvaluated()? "disabled" : "")+">");
+				if(d.isEvaluated()){
+					code.append("<input type=\"submit\" value=\"Valuta\" class=\"disabledButton\" disabled>");
+				}else{
+					code.append("<input type=\"submit\" value=\"Valuta\">");
+				}
 				code.append("</form>");
 				code.append("</td>");
 				code.append("</tr>");

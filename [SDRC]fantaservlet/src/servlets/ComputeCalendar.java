@@ -80,7 +80,7 @@ public class ComputeCalendar extends HttpServlet {
 
 		// connessione al database
 		MySQLConnection dbc = new MySQLConnection();
-		dbc.init();
+		dbc.startup();
 		// lista campionati
 		List<ChampionshipEntity> lc;
 		try {

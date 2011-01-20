@@ -41,7 +41,7 @@ public class Logger {
 
 		// controlla che l'utente sia presente nel database
 		MySQLConnection dbc = new MySQLConnection();
-		dbc.init();
+		dbc.startup();
 		UserEntity user = dbc.getUser(nome);
 		dbc.destroy();
 		// se non esiste il nome utente o se la password è sbagliata
