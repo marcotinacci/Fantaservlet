@@ -47,16 +47,12 @@ public class AddPlayer extends HttpServlet {
 		if(player.isComplete()){
 			nameAvailable = player.isNameAvailable();
 			if(nameAvailable){
-				MySQLConnection dbc = new MySQLConnection();
-				dbc.startup();		
 				try {
-					dbc.insertPlayer(player);
+					MySQLConnection.insertPlayer(player);
 					// stampa avvenuto inserimento
 					out.println(Style.successMessage("Calciatore "+player.getName()+" creato."));					
 				}catch (SQLException sqle){
 					out.println(Style.alertMessage("Errore SQL: "+sqle.getMessage()));
-				}finally{
-					dbc.destroy();
 				}
 			}else{
 				out.println(Style.alertMessage("Nome non disponibile"));

@@ -74,15 +74,11 @@ public class PrintPDF extends HttpServlet {
 			Boolean printTeams = request.getParameter("hire") != null;
 			Boolean printMatches = request.getParameter("match") != null;
 			Boolean printChampResults = request.getParameter("champ") != null;
-			// apri la connessione al database
-			MySQLConnection dbc = new MySQLConnection();
-			dbc.startup();	
 			try {
-				
 				
 				// campionati a cui l'utente partecipa
 				List<ChampionshipEntity> cl = 
-					dbc.getChampionshipOfUser(logger.getUser().getId());				
+					MySQLConnection.getChampionshipOfUser(logger.getUser().getId());				
 				// apri il documento PDF
 				PdfWriter.getInstance(doc,os);				
 				doc.open();
@@ -96,14 +92,14 @@ public class PrintPDF extends HttpServlet {
 					// --- stampa le rose di calciatori ---
 					if(printTeams){
 						// prendi la lista delle squadre
-						List<TeamEntity> teams = dbc.getTeamsOfChampionship(champ.getId());						
+						List<TeamEntity> teams = MySQLConnection.getTeamsOfChampionship(champ.getId());						
 						for(Iterator<TeamEntity> it2 = teams.iterator(); it2.hasNext();){
 							TeamEntity team = it2.next();
 							printHiring(
-								GenericUtilities.getPlayersListByRule(dbc.getHiring(team.getId()), 'D'), 
-								GenericUtilities.getPlayersListByRule(dbc.getHiring(team.getId()), 'C'),
-								GenericUtilities.getPlayersListByRule(dbc.getHiring(team.getId()), 'A'),
-								GenericUtilities.getPlayersListByRule(dbc.getHiring(team.getId()), 'P'),
+								GenericUtilities.getPlayersListByRule(MySQLConnection.getHiring(team.getId()), 'D'), 
+								GenericUtilities.getPlayersListByRule(MySQLConnection.getHiring(team.getId()), 'C'),
+								GenericUtilities.getPlayersListByRule(MySQLConnection.getHiring(team.getId()), 'A'),
+								GenericUtilities.getPlayersListByRule(MySQLConnection.getHiring(team.getId()), 'P'),
 								team, doc);
 						}
 					}
@@ -131,8 +127,6 @@ public class PrintPDF extends HttpServlet {
 				// TODO errore SQL
 				
 			}finally{
-				// chiudi la connessione al database
-				dbc.destroy();
 				// chiudi documento PDF
 				doc.close();				
 			}

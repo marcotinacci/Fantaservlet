@@ -41,17 +41,13 @@ public class ReadXLS implements IReadFile {
 			HSSFSheet sheet = workBook.getSheetAt(0);
 			Iterator<Row> rows = sheet.rowIterator();
 			
-			// connessione al database
-			MySQLConnection dbc = new MySQLConnection();
-			dbc.startup();
-			
 			// salta la prima riga di titolo
 			rows.next();
 			// per ogni calciatore
 			while(rows.hasNext()){
 				Row row = rows.next();
 				// recupera l'id del calciatore da database
-				Integer pid = dbc.getPlayerId(
+				Integer pid = MySQLConnection.getPlayerId(
 					// nome calciatore
 					row.getCell(1).getStringCellValue(),
 					// squadra di provenienza

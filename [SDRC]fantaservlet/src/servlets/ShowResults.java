@@ -46,10 +46,6 @@ public class ShowResults extends HttpServlet {
 		PrintWriter out = response.getWriter();
 		out.println(Style.pageHeader(TITLE));
 		Logger logger = GenericUtilities.checkLoggedIn(request, response, false);
-
-		// connessione al database		
-		MySQLConnection dbc = new MySQLConnection();
-		dbc.startup();	
 		
 		// stampa la selezione del campionato
 		try{
@@ -59,7 +55,7 @@ public class ShowResults extends HttpServlet {
 			 */
 			
 			// prendi i campionati a cui partecipa l'utente
-			List<ChampionshipEntity> lc = dbc.getChampionshipOfUser(logger.getUser().getId());
+			List<ChampionshipEntity> lc = MySQLConnection.getChampionshipOfUser(logger.getUser().getId());
 			if(lc.size() == 0){
 				out.println(Style.infoMessage("Non ci sono campionati"));
 			}else{
@@ -98,8 +94,6 @@ public class ShowResults extends HttpServlet {
 				out.println(Style.infoMessage(bfe.getMessage()));
 			}
 		}
-		// chiudi connessione al database
-		dbc.destroy();
 		out.println(Style.pageFooter());
 	}
 

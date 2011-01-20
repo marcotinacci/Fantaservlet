@@ -52,19 +52,15 @@ public class ChangePassword extends HttpServlet {
 				// controlla che la vecchia password inserita sia corretta
 				if(logger.getUser().getPassword().equalsIgnoreCase(old)){
 					if(user.isConfirmed()){
-						MySQLConnection dbc = new MySQLConnection();
-						dbc.startup();
 						try{
 							// aggiorna la password nel database
-							dbc.updatePassword(logger.getUser().getId(), user.getPassword());
+							MySQLConnection.updatePassword(logger.getUser().getId(), user.getPassword());
 							// aggiorna la password nella sessione
 							logger.getUser().setPassword(user.getPassword());
 							out.println(Style.successMessage(
 								"La password è stata modificata correttamente"));
 						}catch(SQLException sqle){
 							out.println(Style.alertMessage("Errore SQL: "+sqle.getMessage()));							
-						}finally{
-							dbc.destroy();
 						}
 						
 					}else{

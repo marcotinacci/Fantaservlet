@@ -44,12 +44,10 @@ public class DayHandling extends HttpServlet {
 		out.println(Style.pageHeader(TITLE));
 		GenericUtilities.checkLoggedIn(request, response, true);
 		
-		MySQLConnection dc = new MySQLConnection();
-		dc.startup();
 		if(request.getParameter("closeday") != null){
 			// chiudi data selezionata
 			try {
-				dc.updateCloseDay(Integer.parseInt(request.getParameter("closeday")));
+				MySQLConnection.updateCloseDay(Integer.parseInt(request.getParameter("closeday")));
 				out.println(Style.successMessage("Data chiusa"));				
 			} catch (SQLException e) {
 				out.println(Style.alertMessage("Errore SQL: "+e.getMessage()));
@@ -57,7 +55,7 @@ public class DayHandling extends HttpServlet {
 		}else if(request.getParameter("openday") != null){
 			// riapri la data selezionata
 			try {
-				dc.updateOpenDay(Integer.parseInt(request.getParameter("openday")));
+				MySQLConnection.updateOpenDay(Integer.parseInt(request.getParameter("openday")));
 				out.println(Style.successMessage("Data riaperta"));					
 			} catch (SQLException e) {
 				out.println(Style.alertMessage("Errore SQL: "+e.getMessage()));
@@ -68,9 +66,9 @@ public class DayHandling extends HttpServlet {
 			try {
 				// controlla se sono stati assegnati i giudizi a ogni calciatore della giornata
 				Integer evaluatedDay = Integer.parseInt(request.getParameter("evaluateday"));
-				List<PlayerEntity> unevaluatedPlayers = dc.getUnevaluatedPlayersInDay(evaluatedDay);
+				List<PlayerEntity> unevaluatedPlayers = MySQLConnection.getUnevaluatedPlayersInDay(evaluatedDay);
 				if(unevaluatedPlayers.size() == 0){
-					dc.updateEvaluateDay(evaluatedDay);
+					MySQLConnection.updateEvaluateDay(evaluatedDay);
 					out.println(Style.successMessage("Data valutata"));					
 				}else{
 					// stampa i giocatori non valutati nel messaggio di errore
@@ -85,7 +83,7 @@ public class DayHandling extends HttpServlet {
 		}
 		
 		try{
-			List<ChampionshipEntity> lc = dc.getChampionships();
+			List<ChampionshipEntity> lc = MySQLConnection.getChampionships();
 			if(lc.size() == 0){
 				out.println(Style.infoMessage("Non ci sono campionati"));
 			}else{
@@ -94,7 +92,7 @@ public class DayHandling extends HttpServlet {
 					// fissa un campionato c
 					ChampionshipEntity c = i.next();
 					out.println("<h2>Campionato: "+c.getName()+"</h2>");
-					out.println(printModDays(dc.getDayOfChampionship(c.getId())));
+					out.println(printModDays(MySQLConnection.getDayOfChampionship(c.getId())));
 				}
 			}
 		}catch(SQLException sqle){

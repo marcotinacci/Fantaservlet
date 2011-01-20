@@ -53,10 +53,6 @@ public class FormationHandling extends HttpServlet {
 		PrintWriter out = response.getWriter();
 		out.println(Style.pageHeader(TITLE));
 		Logger logger = GenericUtilities.checkLoggedIn(request, response, false);
-		
-		// connessione al database
-		MySQLConnection dbc = new MySQLConnection();
-		dbc.startup();
 
 		// --- stampa le giornate ---
 		try {			
@@ -69,14 +65,14 @@ public class FormationHandling extends HttpServlet {
 			// flag vero se esistono sono giornate
 			Boolean anyDays = false; 
 			// lista dei campionati dell'utente
-			List<ChampionshipEntity> lc = dbc.getDefChampOfUser(logger.getUser().getId());
+			List<ChampionshipEntity> lc = MySQLConnection.getDefChampOfUser(logger.getUser().getId());
 			// stampa le giornate aperte divise per campionato
 			for(Iterator<ChampionshipEntity> i = lc.iterator();i.hasNext();){
 				// fissa un campionato c
 				ChampionshipEntity c = i.next(); 
-				List<DayEntity> ld = dbc.getDayOfChampionship(c.getId());
+				List<DayEntity> ld = MySQLConnection.getDayOfChampionship(c.getId());
 				// TODO far scegliere checkbox se stampare solo le giornate modificabili
-				// --- List<DayEntity> lod = dbc.getOpenDayOfChampionship(c.getId()); ---
+				// --- List<DayEntity> lod = MySQLConnection.getOpenDayOfChampionship(c.getId()); ---
 				if(ld.size() > 0){
 					// segnala che ci sono giornate da stampare
 					anyDays = true;
@@ -112,8 +108,8 @@ public class FormationHandling extends HttpServlet {
 				try{
 					FormationEntity fe = new FormationEntity();
 					BeanUtilities.populateBean(fe,request);
-					ChampionshipEntity c = dbc.getChampionshipOfTeam(fe.getTeam());
-					List<DayEntity> ld = dbc.getOpenDayOfChampionship(c.getId());
+					ChampionshipEntity c = MySQLConnection.getChampionshipOfTeam(fe.getTeam());
+					List<DayEntity> ld = MySQLConnection.getOpenDayOfChampionship(c.getId());
 					// lista degli id delle giornate aperte
 					List<Integer> lid = new ArrayList<Integer>();
 					for(Iterator<DayEntity> it = ld.iterator(); it.hasNext();){
@@ -124,11 +120,11 @@ public class FormationHandling extends HttpServlet {
 						// se la formazione ricevuta è corretta, non è già presente una formazione
 						// e la giornata è ancora aperta a modifiche						
 						if(fe.isCorrect() && 
-							dbc.getFormation(fe.getTeam(), fe.getDay()).isEmpty() && 
+							MySQLConnection.getFormation(fe.getTeam(), fe.getDay()).isEmpty() && 
 							lid.contains(fe.getDay()))
 						{
 							// inserisci i dati della convocazione
-							dbc.insertFormation(fe);
+							MySQLConnection.insertFormation(fe);
 							out.println(Style.successMessage("Formazione salvata"));
 						}else{
 							// dati inseriti scorretti
@@ -149,8 +145,8 @@ public class FormationHandling extends HttpServlet {
 					BeanUtilities.populateBean(fe,request);
 					// se la formazione ricevuta è corretta e la giornata è ancora aperta a modifiche
 					// (in questo caso la formazione DEVE essere già presente in quanto da modificare)
-					ChampionshipEntity c = dbc.getChampionshipOfTeam(fe.getTeam());
-					List<DayEntity> ld = dbc.getOpenDayOfChampionship(c.getId());
+					ChampionshipEntity c = MySQLConnection.getChampionshipOfTeam(fe.getTeam());
+					List<DayEntity> ld = MySQLConnection.getOpenDayOfChampionship(c.getId());
 					// lista degli id delle giornate aperte
 					List<Integer> lid = new ArrayList<Integer>();
 					for(Iterator<DayEntity> it = ld.iterator(); it.hasNext();){
@@ -168,7 +164,7 @@ public class FormationHandling extends HttpServlet {
 						out.println(Style.alertMessage("Non è possibile fare modifiche a una giornata chiusa"));						
 					}else{
 						// aggiorna la formazione passando al metodo il nuovo e il vecchio schieramento
-						dbc.updateFormation(fe,dbc.getFormation(fe.getTeam(), fe.getDay()));			
+						MySQLConnection.updateFormation(fe,MySQLConnection.getFormation(fe.getTeam(), fe.getDay()));			
 						out.println(Style.successMessage("Formazione modificata"));
 					}
 				}catch(SQLException sqle){
@@ -181,7 +177,7 @@ public class FormationHandling extends HttpServlet {
 				Integer did = Integer.parseInt(request.getParameter("day"));
 				// determina se la giornata è aperta alle modifiche
 				List<DayEntity> openDays = 
-					dbc.getOpenDayOfChampionship(dbc.getChampionshipOfDay(did).getId());
+					MySQLConnection.getOpenDayOfChampionship(MySQLConnection.getChampionshipOfDay(did).getId());
 				// flag true se la giornata è aperta alle modifiche
 				Boolean isOpenDay = false;
 				for(Iterator<DayEntity> it = openDays.iterator(); it.hasNext();){
@@ -194,29 +190,29 @@ public class FormationHandling extends HttpServlet {
 				// stampa messaggio giornata chiusa
 				if(!isOpenDay)
 					out.println(Style.infoMessage("La giornata non &egrave; aperta alle modifiche"));
-				List<TeamEntity> lTeam = dbc.getTeamsOfUserInDay(logger.getUser().getId(),did);
+				List<TeamEntity> lTeam = MySQLConnection.getTeamsOfUserInDay(logger.getUser().getId(),did);
 				if(lTeam.size() > 0){
 					// per ogni squadra
 					for(Iterator<TeamEntity> it = lTeam.iterator(); it.hasNext();){
 						TeamEntity team = it.next();
 						out.println("<hr>\n<h2>"+team.getName()+"</h2>");						
 						// prendi le convocazioni della squadra da database
-						List<PlayerEntity> hiredPlayers = dbc.getHiredPlayers(team.getId());
+						List<PlayerEntity> hiredPlayers = MySQLConnection.getHiredPlayers(team.getId());
 						//se sono stati convocati giocatori per questa squadra
 						if(hiredPlayers.size() > 0){
 							// recupera da database la formazione della squadra nel giorno
-							FormationEntity formation = dbc.getFormation(team.getId(), did);
+							FormationEntity formation = MySQLConnection.getFormation(team.getId(), did);
 							if(!formation.isEmpty()){
 								// --- formazione attuale ---
 								out.println(printFormation(
-										dbc.getPlayersById(formation.getDef()), 
-										dbc.getPlayersById(formation.getCen()), 
-										dbc.getPlayersById(formation.getAtt()), 
-										dbc.getPlayersById(formation.getGolkeep()), 
-										dbc.getPlayersById(formation.getResDef()),
-										dbc.getPlayersById(formation.getResCen()),
-										dbc.getPlayersById(formation.getResAtt()),
-										dbc.getPlayersById(formation.getResGolkeep()),
+										MySQLConnection.getPlayersById(formation.getDef()), 
+										MySQLConnection.getPlayersById(formation.getCen()), 
+										MySQLConnection.getPlayersById(formation.getAtt()), 
+										MySQLConnection.getPlayersById(formation.getGolkeep()), 
+										MySQLConnection.getPlayersById(formation.getResDef()),
+										MySQLConnection.getPlayersById(formation.getResCen()),
+										MySQLConnection.getPlayersById(formation.getResAtt()),
+										MySQLConnection.getPlayersById(formation.getResGolkeep()),
 										team));
 							}
 							
@@ -284,9 +280,6 @@ public class FormationHandling extends HttpServlet {
 				out.println(Style.alertMessage("Errore SQL: "+sqle.getMessage()));				
 			}
 		}
-
-		// chiusura database
-		dbc.destroy();
 
 		out.println(Style.pageFooter());
 	}

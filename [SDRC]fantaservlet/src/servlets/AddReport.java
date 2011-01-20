@@ -50,8 +50,6 @@ public class AddReport extends HttpServlet {
 		GenericUtilities.checkLoggedIn(request, response, true);		
 		
 		// assegnamento voto
-		MySQLConnection dbc = new MySQLConnection();
-		dbc.startup();
 		String todo = request.getParameter("todo");
 		if(todo != null){
 			// richiesta di inserimento azione
@@ -62,7 +60,7 @@ public class AddReport extends HttpServlet {
 				if(report.isComplete()){
 					try{
 						// inserimento report
-						dbc.insertReport(report);
+						MySQLConnection.insertReport(report);
 						out.println(Style.successMessage("Valutazione inserita"));
 					}catch(SQLException sqle){
 						// in caso di errore SQL stampa l'alert
@@ -77,7 +75,7 @@ public class AddReport extends HttpServlet {
 				if(giudge.isComplete()){
 					try{
 						// inserimento report
-						dbc.insertGiudge(giudge);
+						MySQLConnection.insertGiudge(giudge);
 						out.println(Style.successMessage("Giudizio inserito"));
 					}catch(SQLException sqle){
 						// in caso di errore SQL stampa l'alert
@@ -88,9 +86,9 @@ public class AddReport extends HttpServlet {
 			}
 		}
 		try {
-			List<VoteEntity> lv = dbc.getVotes();
-			List<ChampionshipEntity> lc = dbc.getChampionships();
-			List<PlayerEntity> lp = dbc.getPlayers();
+			List<VoteEntity> lv = MySQLConnection.getVotes();
+			List<ChampionshipEntity> lc = MySQLConnection.getChampionships();
+			List<PlayerEntity> lp = MySQLConnection.getPlayers();
 			
 			if(lc.size() == 0) throw new BadFormException("Non ci sono campionati");
 			if(lp.size() == 0) throw new BadFormException("Non ci sono calciatori");
@@ -114,7 +112,7 @@ public class AddReport extends HttpServlet {
 			for(Iterator<ChampionshipEntity> i = lc.iterator(); i.hasNext(); ){
 				// fissa un campionato c
 				ChampionshipEntity c = i.next();	
-				List<DayEntity> ld = dbc.getDayOfChampionship(c.getId());
+				List<DayEntity> ld = MySQLConnection.getDayOfChampionship(c.getId());
 				if(ld.size() > 0){
 					noDays = false;
 					// stampa le giornate del campionato c
@@ -160,7 +158,7 @@ public class AddReport extends HttpServlet {
 			for(Iterator<ChampionshipEntity> i = lc.iterator(); i.hasNext(); ){
 				// fissa un campionato c
 				ChampionshipEntity c = i.next();	
-				List<DayEntity> ld = dbc.getDayOfChampionship(c.getId());
+				List<DayEntity> ld = MySQLConnection.getDayOfChampionship(c.getId());
 				if(ld.size() > 0){
 					noDays = false;
 					// stampa le giornate del campionato c
@@ -198,7 +196,7 @@ public class AddReport extends HttpServlet {
 
 		out.println(Style.pageFooter());
 		// chiudi la connessione al database
-		dbc.destroy();
+		MySQLConnection.destroy();
 	}
 
 	/**

@@ -44,11 +44,8 @@ public class CalendarGenerator {
 		Integer nTeam;
 		Integer nDay;
 		
-		// connessione al database
-		MySQLConnection dc = new MySQLConnection();
-		dc.startup();
 		// prendi la lista delle squadre
-		List<TeamEntity> lt = dc.getTeamsOfChampionship(calendar.getIdChampionship());
+		List<TeamEntity> lt = MySQLConnection.getTeamsOfChampionship(calendar.getIdChampionship());
 		// numero squadre
 		nTeam = lt.size();
 		if(nTeam % 2 == 1 || nTeam < 6 || nTeam > 12){
@@ -75,11 +72,11 @@ public class CalendarGenerator {
 			lde.add(d);
 		}
 		// inserisci le giornate nel database
-		dc.insertDays(lde);
+		MySQLConnection.insertDays(lde);
 		
 		// TODO la lista delle giornate è già presente, è necessario riprendere tutti i dati dal database per recuperare gli id autogenerati?
 		// recupera la lista delle giornate complete di identificativo
-		lde = dc.getDayOfChampionship(calendar.getIdChampionship());
+		lde = MySQLConnection.getDayOfChampionship(calendar.getIdChampionship());
 		// prepara la lista delle partite
 		List<MatchEntity> lme = new ArrayList<MatchEntity>();
 		// genera le PARTITE per ogni giornata
@@ -103,9 +100,7 @@ public class CalendarGenerator {
 			}
 			GenericUtilities.rotate(lt, 1, lt.size()-1);
 		}
-		dc.insertMatches(lme);
-		// chiudi connessione al database
-		dc.destroy();
+		MySQLConnection.insertMatches(lme);
 	}
 	
 }

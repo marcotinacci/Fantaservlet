@@ -226,29 +226,25 @@ public class GenericUtilities {
 	 * @return lista degli scontri
 	 * @throws SQLException sollevata quando le query al database falliscono
 	 */
-	static public List<Match> getListOfMatches(Integer cid) throws SQLException{
-		// connessione al database		
-		MySQLConnection dbc = new MySQLConnection();
-		dbc.startup();			
+	static public List<Match> getListOfMatches(Integer cid) throws SQLException{	
 		// composizione dei dati
 		List<Match> versus = new ArrayList<Match>();
 		// recupera le giornate del campionato
-		List<DayEntity> days = dbc.getDayOfChampionship(cid);
+		List<DayEntity> days = MySQLConnection.getDayOfChampionship(cid);
 		// per ogni giornata
 		for(Iterator<DayEntity> it = days.iterator(); it.hasNext();){
 			// giornata
 			DayEntity day = it.next();
 			// recupera i dati delle partite della giornata
-			List<Pair<TeamEntity,TeamEntity>> matches = dbc.getMatchesOfDay(day.getId());
+			List<Pair<TeamEntity,TeamEntity>> matches = MySQLConnection.getMatchesOfDay(day.getId());
 			// per ogni partita
 			for(Iterator<Pair<TeamEntity,TeamEntity>> it2 = matches.iterator(); it2.hasNext();){
 				Pair<TeamEntity,TeamEntity> pair = it2.next();
 				versus.add(new Match(day, pair.getFirst(), pair.getSecond(), 
-					dbc.getPointsOfTeamInDay(pair.getFirst().getId(),day.getId()), 
-					dbc.getPointsOfTeamInDay(pair.getSecond().getId(),day.getId())));
+					MySQLConnection.getPointsOfTeamInDay(pair.getFirst().getId(),day.getId()), 
+					MySQLConnection.getPointsOfTeamInDay(pair.getSecond().getId(),day.getId())));
 			}
 		}
-		dbc.destroy();
 		return versus;		
 	}
 	

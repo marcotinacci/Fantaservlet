@@ -48,14 +48,12 @@ public class AddUser extends HttpServlet {
 		BeanUtilities.populateBean(user, request);
 		if(request.getParameter("todo") != null){
 			if(user.isComplete()){
-				MySQLConnection dbc = new MySQLConnection();
-				dbc.startup();
 				try {
 					nameAvailable = user.isAvailableName();
 					confirmPassword = user.isConfirmed();
 					if(confirmPassword){
 						if(nameAvailable){
-							dbc.insertUser(user);
+							MySQLConnection.insertUser(user);
 							// stampa avvenuto inserimento
 							out.println(Style.successMessage("Utente "+user.getName()+" creato."));
 						}
@@ -69,8 +67,6 @@ public class AddUser extends HttpServlet {
 					}
 				} catch (SQLException sqle) {
 					out.println(Style.alertMessage("Errore SQL: "+sqle.getMessage()));
-				}finally{
-					dbc.destroy();
 				}
 			}else{
 				out.println(Style.alertMessage("Inserire tutti i campi"));

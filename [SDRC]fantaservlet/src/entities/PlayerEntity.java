@@ -54,10 +54,7 @@ public class PlayerEntity {
 	}
 	
 	public boolean isNameAvailable(){
-		MySQLConnection dbc = new MySQLConnection();
-		dbc.startup();		
-		List<PlayerEntity> lp = dbc.getPlayers();
-		dbc.destroy();
+		List<PlayerEntity> lp = MySQLConnection.getPlayers();
 		for(Iterator<PlayerEntity> it = lp.listIterator(); it.hasNext();){
 			PlayerEntity t = it.next();
 			if(name.equals(t.getName())){

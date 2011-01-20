@@ -40,10 +40,7 @@ public class Logger {
 			throw new BlankLoginInfoException();
 
 		// controlla che l'utente sia presente nel database
-		MySQLConnection dbc = new MySQLConnection();
-		dbc.startup();
-		UserEntity user = dbc.getUser(nome);
-		dbc.destroy();
+		UserEntity user = MySQLConnection.getUser(nome);
 		// se non esiste il nome utente o se la password è sbagliata
 		if(user == null || !user.getPassword().equals(password))
 			throw new WrongLoginInputException();

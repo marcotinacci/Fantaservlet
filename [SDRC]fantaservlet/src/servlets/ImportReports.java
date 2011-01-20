@@ -55,9 +55,6 @@ public class ImportReports extends HttpServlet {
 		out.println(Style.pageHeader(TITLE));
 		GenericUtilities.checkLoggedIn(request, response, true);
 		
-		//connessione al database (viene fatta anche se non si riceve un file per la stampa del form)
-		MySQLConnection dbc = new MySQLConnection();
-		dbc.startup();
 		// controlla se la richiesta è un formato multipart 
 		if (ServletFileUpload.isMultipartContent(request))
 		{
@@ -90,7 +87,7 @@ public class ImportReports extends HttpServlet {
 					// se il report è completo inseriscilo nel database
 					if(rep.isComplete()){
 						try{
-							dbc.insertReport(rep);
+							MySQLConnection.insertReport(rep);
 							out.println(Style.successMessage("Voto "+rep+" inserito."));
 						}catch(SQLException sqle){
 							out.println(Style.alertMessage("Errore SQL: "+sqle.getMessage()));
@@ -107,7 +104,7 @@ public class ImportReports extends HttpServlet {
 					// se il giudge è completo inseriscilo nel database
 					if(rep.isComplete()){
 						try{
-							dbc.insertGiudge(rep);
+							MySQLConnection.insertGiudge(rep);
 							out.println(Style.successMessage("Giudizio "+rep+" inserito."));
 						}catch(SQLException sqle){
 							out.println(Style.alertMessage("Errore SQL: "+sqle.getMessage()));
@@ -126,7 +123,7 @@ public class ImportReports extends HttpServlet {
 			StringBuffer code = new StringBuffer();
 			// lista dei campionati
 			List<ChampionshipEntity> lc;
-			lc = dbc.getChampionships();
+			lc = MySQLConnection.getChampionships();
 			if(lc.size() == 0){
 				throw new BadFormException("Non ci sono campionati");
 			}
@@ -142,7 +139,7 @@ public class ImportReports extends HttpServlet {
 			for(Iterator<ChampionshipEntity> i = lc.iterator();i.hasNext();){
 				// fissa un campionato c
 				ChampionshipEntity c = i.next();	
-				List<DayEntity> ld = dbc.getDayOfChampionship(c.getId());
+				List<DayEntity> ld = MySQLConnection.getDayOfChampionship(c.getId());
 				if(ld.size() > 0){
 					out.println(Style.optionGroup(c.getName()));	
 					// stampa le giornate del campionato c
@@ -171,8 +168,6 @@ public class ImportReports extends HttpServlet {
 			out.println(Style.alertMessage("Errore SQL: "+e.getMessage()));
 		} catch (BadFormException bfe) {
 			out.println(Style.alertMessage(bfe.getMessage()));
-		}finally{
-			dbc.destroy();
 		}
 		
 		out.println(Style.pageFooter());

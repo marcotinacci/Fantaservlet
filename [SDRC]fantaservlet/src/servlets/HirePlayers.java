@@ -47,9 +47,6 @@ public class HirePlayers extends HttpServlet {
 		out.println(Style.pageHeader(TITLE));
 		GenericUtilities.checkLoggedIn(request, response, true);
 		
-		// connessione al database
-		MySQLConnection dbc = new MySQLConnection();
-		dbc.startup();
 		// acquisizione dati da request
 		ChampionshipEntity ce = new ChampionshipEntity();
 		BeanUtilities.populateBean(ce,request);
@@ -59,7 +56,7 @@ public class HirePlayers extends HttpServlet {
 		if(ce.getId() != null){
 			try{
 				// recupera calciatori non assegnati nel campionato
-				List<PlayerEntity> lp = dbc.getAvailablePlayers(ce.getId());
+				List<PlayerEntity> lp = MySQLConnection.getAvailablePlayers(ce.getId());
 				if(lp.size() == 0){
 					throw new BadFormException("Non ci sono calciatori da convocare");
 				}
@@ -67,7 +64,7 @@ public class HirePlayers extends HttpServlet {
 				out.println("<form name=\"hireplayers\" method=\"POST\">");
 				out.println("Squadra: <select name=\"team\">");
 				// stampa i tipi di voti
-				List<TeamEntity> lt = dbc.getOpenTeamsOfChampionship(ce.getId());
+				List<TeamEntity> lt = MySQLConnection.getOpenTeamsOfChampionship(ce.getId());
 				for(Iterator<TeamEntity> it = lt.iterator();it.hasNext();){
 					TeamEntity t = it.next();
 					out.println(Style.option(t.getId().toString(),t.getName()));
@@ -159,7 +156,7 @@ public class HirePlayers extends HttpServlet {
 				if(ghe.isComplete() && ghe.isCorrect()){
 					// inserisci i dati della convocazione
 					try {
-						dbc.insertHireGroup(ghe);
+						MySQLConnection.insertHireGroup(ghe);
 						out.println(Style.successMessage("Convocazione effettuata con successo"));						
 					} catch (SQLException sqle) {
 						out.println(Style.alertMessage("Errore SQL: "+sqle.getMessage()));
@@ -173,7 +170,7 @@ public class HirePlayers extends HttpServlet {
 				}
 			}
 			try{
-				List<ChampionshipEntity> cel = dbc.getHireableChampionships();
+				List<ChampionshipEntity> cel = MySQLConnection.getHireableChampionships();
 				if(cel.size() == 0){
 					// avvisa che non esistono campionati
 					out.println(Style.alertMessage(
@@ -194,8 +191,7 @@ public class HirePlayers extends HttpServlet {
 				// stampa messaggio di errore
 				out.println(Style.alertMessage("Errore SQL: "+sqle.getMessage()));
 			}
-		}
-		dbc.destroy(); 		
+		} 		
 
 		out.println(Style.pageFooter());		
 	}

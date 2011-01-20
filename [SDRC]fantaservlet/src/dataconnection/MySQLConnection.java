@@ -16,38 +16,33 @@ import java.util.List;
 import java.util.Properties;
 import java.sql.PreparedStatement;
 
-import javax.servlet.http.HttpServlet;
-
 import utils.Pair;
 
 /**
  * @author Michael
  * Questa classe offre i metodi di interazione col database mysql (insert, select, delete)
  */
-public class MySQLConnection extends HttpServlet {
+public class MySQLConnection{
 	
 	// driver mysql tramite Connector/J
-	private final String driver = "com.mysql.jdbc.Driver";
+	static private final String driver = "com.mysql.jdbc.Driver";
 	// percorso del database
 	//protected String url = "jdbc:mysql://localhost:3306/fsdb";
 	// informazioni per l'accesso al database
-	protected Properties userInfo = new Properties();
+	static protected Properties userInfo = new Properties();
 	// connessione di rete al database
-	protected Connection connection;
+	static protected Connection connection;
 	// statement per l'esecuzione delle query
-	protected PreparedStatement preparedStatement;
-	
-	public MySQLConnection(){}
+	static protected PreparedStatement preparedStatement;
 	
 	/**
-	 * Inizializzazione della connessione al database 
+	 * Inizializzazione della connessione al database
 	 */
-	public void startup(){
+	static public void startup(String configpath){
 		// Read properties file.
-		getServletContext().getRealPath("/");
 		FileInputStream fis;
 		try {
-			fis = new FileInputStream(getServletContext().getRealPath("/"));
+			fis = new FileInputStream(configpath);
 			Properties prop = new Properties();
 			prop.load(fis);
 			// definisci i dati di accesso al database
@@ -73,7 +68,7 @@ public class MySQLConnection extends HttpServlet {
 	/**
 	 * Chiusura della connessione al database
 	 */
-	public void destroy() {
+	static public void destroy() {
 		try {
 			connection.close();			
 		} catch(Exception e) {
@@ -86,7 +81,7 @@ public class MySQLConnection extends HttpServlet {
 	 * @param uid identificatore utente
 	 * @return lista di identificativi delle squadre
 	 */
-	public ArrayList<Integer> getTeams(int uid){
+	static public ArrayList<Integer> getTeams(int uid){
 		ArrayList<Integer> resArray = new ArrayList<Integer>();		
 		try 
 		{
@@ -107,7 +102,7 @@ public class MySQLConnection extends HttpServlet {
 	 * @return lista utenti
 	 * @throws SQLException sollevata quando la query fallisce
 	 */
-	public List<UserEntity> getUsers() throws SQLException{
+	static public List<UserEntity> getUsers() throws SQLException{
 		List<UserEntity> lu = new ArrayList<UserEntity>();
 		preparedStatement = connection.prepareStatement(
 			"SELECT idUtente, Nome, Password, Admin FROM Utente");
@@ -124,7 +119,7 @@ public class MySQLConnection extends HttpServlet {
 	 * @param name nome utente
 	 * @return i dati dell'utente, null se non esiste il nome
 	 */
-	public UserEntity getUser(String name) throws SQLException{
+	static public UserEntity getUser(String name) throws SQLException{
 		preparedStatement = connection.prepareStatement(
 			"SELECT idUtente, Nome, Password, Admin FROM Utente WHERE Nome = ?");
 		preparedStatement.setString(1, name);
@@ -142,7 +137,7 @@ public class MySQLConnection extends HttpServlet {
 	 * @param user utente da inserire
 	 * @throws SQLException sollevata quando la query fallisce
 	 */
-	public void insertUser(UserEntity user) throws SQLException{
+	static public void insertUser(UserEntity user) throws SQLException{
 		preparedStatement = connection.prepareStatement(
 			"INSERT INTO Utente(Nome,Password,Admin) VALUES (?,?,?)");
 		preparedStatement.setString(1, user.getName());
@@ -157,7 +152,7 @@ public class MySQLConnection extends HttpServlet {
 	 * @param newPassword nuova password
 	 * @throws SQLException sollevata quando la query fallisce
 	 */
-	public void updatePassword(Integer uid, String newPassword) 
+	static public void updatePassword(Integer uid, String newPassword) 
 		throws SQLException{
 		// query di modifica password
 		preparedStatement = connection.prepareStatement(
@@ -172,7 +167,7 @@ public class MySQLConnection extends HttpServlet {
 	 * @return lista campionati
 	 * @throws SQLException sollevata se l'esecuzione della query fallisce
 	 */
-	public List<ChampionshipEntity> getChampionships() throws SQLException {
+	static public List<ChampionshipEntity> getChampionships() throws SQLException {
 		List<ChampionshipEntity> lc = new ArrayList<ChampionshipEntity>();
 		String query = "SELECT idCampionato, Nome FROM Campionato";
 		preparedStatement = connection.prepareStatement(query);
@@ -188,7 +183,7 @@ public class MySQLConnection extends HttpServlet {
 	 * @return lista di campionati
 	 * @throws SQLException sollevata quando la query fallisce
 	 */
-	public List<ChampionshipEntity> getHireableChampionships() throws SQLException {
+	static public List<ChampionshipEntity> getHireableChampionships() throws SQLException {
 		List<ChampionshipEntity> lc = new ArrayList<ChampionshipEntity>();
 		/* 
 		 * la query seleziona i campionati che contengono squadre che non hanno ancora giocatori
@@ -214,7 +209,7 @@ public class MySQLConnection extends HttpServlet {
 	 * metodo che restituisce i calciatori
 	 * @return lista calciatori
 	 */
-	public List<PlayerEntity> getPlayers() {
+	static public List<PlayerEntity> getPlayers() {
 		List<PlayerEntity> lp = new ArrayList<PlayerEntity>();
 		try{
 			String query = "SELECT idCalciatore, Nome, Ruolo, Squadra FROM Calciatore";
@@ -236,7 +231,7 @@ public class MySQLConnection extends HttpServlet {
 	 * @param player calciatore da inserire
 	 * @throws SQLException eccezione lanciata in caso di violazione del vincolo UNIQUE sui campi Nome e Squadra
 	 */
-	public void insertPlayer(PlayerEntity player) throws SQLException{
+	static public void insertPlayer(PlayerEntity player) throws SQLException{
 		// usa uno statement precompilato per prevenire injection, prevalentemente per gli apici
 		preparedStatement = connection.prepareStatement("INSERT INTO Calciatore(Nome,Ruolo,Squadra) VALUES (?,?,?)");
 		// inserisci il nome
@@ -255,7 +250,7 @@ public class MySQLConnection extends HttpServlet {
 	 * @param championship campionato da inserire
 	 * @throws SQLException sollevata quando la query sql fallisce
 	 */
-	public void insertChampionship(ChampionshipEntity championship) throws SQLException{
+	static public void insertChampionship(ChampionshipEntity championship) throws SQLException{
 		String query = "INSERT INTO Campionato(Nome) VALUES (?)";
 		preparedStatement = connection.prepareStatement(query);
 		preparedStatement.setString(1, championship.getName());
@@ -267,7 +262,7 @@ public class MySQLConnection extends HttpServlet {
 	 * @return lista squadre
 	 * @throws SQLException sollevata quando la query fallisce
 	 */
-	public List<TeamEntity> getTeams() throws SQLException {
+	static public List<TeamEntity> getTeams() throws SQLException {
 		List<TeamEntity> lt = new ArrayList<TeamEntity>();
 		String query = "SELECT idSquadra, Nome, Campionato_idCampionato, Utente_idUtente FROM Squadra";
 		preparedStatement = connection.prepareStatement(query);
@@ -284,7 +279,7 @@ public class MySQLConnection extends HttpServlet {
 	 * @return lista utenti giocanti
 	 * @throws SQLException sollevata quando la query fallisce
 	 */
-	public List<UserEntity> getPlayingUsers() throws SQLException {
+	static public List<UserEntity> getPlayingUsers() throws SQLException {
 		List<UserEntity> lpu = new ArrayList<UserEntity>();
 		String query = "SELECT idUtente, Nome, Password FROM Utente WHERE Admin = 0";
 		preparedStatement = connection.prepareStatement(query);			
@@ -301,7 +296,7 @@ public class MySQLConnection extends HttpServlet {
 	 * @param championship campionato da inserire
 	 * @throws SQLException sollevata quando la query fallisce
 	 */
-	public void insertTeam(TeamEntity team) throws SQLException{
+	static public void insertTeam(TeamEntity team) throws SQLException{
 		String query = "INSERT INTO Squadra(Nome,Campionato_idCampionato,Utente_idUtente) VALUES (?,?,?)";
 		preparedStatement = connection.prepareStatement(query);
 		preparedStatement.setString(1, team.getName());
@@ -316,7 +311,7 @@ public class MySQLConnection extends HttpServlet {
 	 * @return lista delle giornate
 	 * @throws SQLException sollevata quando la query fallisce
 	 */
-	public List<DayEntity> getOpenDayOfChampionship(Integer idChamp) throws SQLException {
+	static public List<DayEntity> getOpenDayOfChampionship(Integer idChamp) throws SQLException {
 		List<DayEntity> lodoc = new ArrayList<DayEntity>();
 		// query di selezione
 		preparedStatement = connection.prepareStatement(
@@ -338,7 +333,7 @@ public class MySQLConnection extends HttpServlet {
 	 * @param group rosa di giocatori da inserire
 	 * @throws SQLException sollevata quando la query fallisce
 	 */
-	public void insertHireGroup(GroupHireEntity group) throws SQLException{
+	static public void insertHireGroup(GroupHireEntity group) throws SQLException{
 		StringBuffer query = new StringBuffer(
 			"INSERT INTO Convocazione(Calciatore_idCalciatore ,Squadra_idSquadra) VALUES ");
 		List<Integer> players = group.getPlayers();
@@ -368,7 +363,7 @@ public class MySQLConnection extends HttpServlet {
 	 * @return squadra (null in caso di risultato vuoto)
 	 * @throws SQLException sollevata quando la query fallisce
 	 */
-	public TeamEntity getTeam(Integer idTeam) throws SQLException {
+	static public TeamEntity getTeam(Integer idTeam) throws SQLException {
 		StringBuffer query = new StringBuffer("SELECT * FROM Squadra WHERE idSquadra = ?");
 		preparedStatement = connection.prepareStatement(query.toString());
 		// inserisci l'id della squadra nella query
@@ -389,7 +384,7 @@ public class MySQLConnection extends HttpServlet {
 	 * @return lista di squadre
 	 * @throws SQLException sollevata quando la query fallisce
 	 */
-	public List<TeamEntity> getTeamsOfChampionship(Integer idChamp) throws SQLException {
+	static public List<TeamEntity> getTeamsOfChampionship(Integer idChamp) throws SQLException {
 		List<TeamEntity> lte = new ArrayList<TeamEntity>();
 		StringBuffer query = new StringBuffer("SELECT * FROM Squadra WHERE Campionato_idCampionato = ?");
 		preparedStatement = connection.prepareStatement(query.toString());
@@ -411,7 +406,7 @@ public class MySQLConnection extends HttpServlet {
 	 * @return lista di squadre
 	 * @throws SQLException sollevata quando la query fallisce
 	 */
-	public List<TeamEntity> getOpenTeamsOfChampionship(Integer idChamp) throws SQLException {
+	static public List<TeamEntity> getOpenTeamsOfChampionship(Integer idChamp) throws SQLException {
 		List<TeamEntity> lte = new ArrayList<TeamEntity>();
 		StringBuffer query = new StringBuffer("SELECT * FROM Squadra " +
 			"WHERE Campionato_idCampionato = ? AND " +
@@ -435,7 +430,7 @@ public class MySQLConnection extends HttpServlet {
 	 * @return lista di calciatori
 	 * @throws SQLException sollevata quando la query fallisce
 	 */
-	public List<PlayerEntity> getAvailablePlayers(Integer idChamp) throws SQLException {
+	static public List<PlayerEntity> getAvailablePlayers(Integer idChamp) throws SQLException {
 		List<PlayerEntity> lpe = new ArrayList<PlayerEntity>();
 		// query di recupero calciatori non convocati nel campionato selezionato
 		StringBuffer query = new StringBuffer(
@@ -462,7 +457,7 @@ public class MySQLConnection extends HttpServlet {
 	 * @param lde lista delle giornate da inserire
 	 * @throws SQLException sollevata quando la query fallisce
 	 */
-	public void insertDays(List<DayEntity> lde) throws SQLException{
+	static public void insertDays(List<DayEntity> lde) throws SQLException{
 		// controlla se ci sono giornate da inserire
 		if(lde.size() > 0){
 			StringBuffer query = new StringBuffer(
@@ -494,7 +489,7 @@ public class MySQLConnection extends HttpServlet {
 	 * @param lme lista delle partite da inserire
 	 * @throws SQLException sollevata quando la query fallisce
 	 */
-	public void insertMatches(List<MatchEntity> lme) throws SQLException{
+	static public void insertMatches(List<MatchEntity> lme) throws SQLException{
 		// controlla se ci sono partite da inserire
 		if(lme.size() > 0){
 			StringBuffer query = new StringBuffer(
@@ -524,7 +519,7 @@ public class MySQLConnection extends HttpServlet {
 	 * @return lista di giornate
 	 * @throws SQLException sollevata quando la query fallisce
 	 */
-	public List<DayEntity> getDayOfChampionship(Integer idChamp) throws SQLException {
+	static public List<DayEntity> getDayOfChampionship(Integer idChamp) throws SQLException {
 		List<DayEntity> lde = new ArrayList<DayEntity>();
 		// query di recupero delle date
 		StringBuffer query = new StringBuffer(
@@ -548,7 +543,7 @@ public class MySQLConnection extends HttpServlet {
 	 * @return lista di campionati
 	 * @throws SQLException sollevata quando la query fallisce
 	 */
-	public List<ChampionshipEntity> getUndefinedChampionships() throws SQLException {
+	static public List<ChampionshipEntity> getUndefinedChampionships() throws SQLException {
 		List<ChampionshipEntity> lce = new ArrayList<ChampionshipEntity>();
 		// query di recupero dei campionati non definiti
 		StringBuffer query = new StringBuffer(
@@ -569,7 +564,7 @@ public class MySQLConnection extends HttpServlet {
 	 * @param dayId identificativo giornata da chiudere
 	 * @throws SQLException sollevata quando la query fallisce
 	 */
-	public void updateCloseDay(Integer dayId) throws SQLException{
+	static public void updateCloseDay(Integer dayId) throws SQLException{
 		// query di update della data
 		preparedStatement = connection.prepareStatement(
 			"UPDATE Giornata SET Chiusa = 1 WHERE idGiornata = ?");
@@ -584,7 +579,7 @@ public class MySQLConnection extends HttpServlet {
 	 * @param dayId identificativo giornata da riaprire
 	 * @throws SQLException sollevata quando la query fallisce
 	 */
-	public void updateOpenDay(Integer dayId) throws SQLException{
+	static public void updateOpenDay(Integer dayId) throws SQLException{
 		// query di update della data
 		preparedStatement = connection.prepareStatement(
 			"UPDATE Giornata SET Chiusa = 0 WHERE idGiornata = ?");
@@ -599,7 +594,7 @@ public class MySQLConnection extends HttpServlet {
 	 * @param dayId identificativo giornata da valutare
 	 * @throws SQLException sollevata quando la query fallisce
 	 */
-	public void updateEvaluateDay(Integer dayId) throws SQLException{
+	static public void updateEvaluateDay(Integer dayId) throws SQLException{
 		// query di update della data
 		// se la giornata viene valutata viene automaticamente anche chiusa
 		preparedStatement = connection.prepareStatement(
@@ -615,7 +610,7 @@ public class MySQLConnection extends HttpServlet {
 	 * @return lista di voti
 	 * @throws SQLException sollevata quando la query fallisce
 	 */
-	public List<VoteEntity> getVotes() throws SQLException {
+	static public List<VoteEntity> getVotes() throws SQLException {
 		List<VoteEntity> lve = new ArrayList<VoteEntity>();
 		// query di recupero dei voti
 		preparedStatement = connection.prepareStatement("SELECT * FROM Voto");
@@ -633,7 +628,7 @@ public class MySQLConnection extends HttpServlet {
 	 * @param report votazione da inserire
 	 * @throws SQLException sollevata quando la query fallisce
 	 */
-	public void insertReport(ReportEntity report) throws SQLException{
+	static public void insertReport(ReportEntity report) throws SQLException{
 		// query di inserimento votazione in pagella
 		String query = 
 			"INSERT INTO Pagella(Voto_idVoto,Giornata_idGiornata,Calciatore_idCalciatore) VALUES (?,?,?)";
@@ -653,7 +648,7 @@ public class MySQLConnection extends HttpServlet {
 	 * @param giudge giudizio da inserire
 	 * @throws SQLException sollevata quando la query fallisce
 	 */
-	public void insertGiudge(GiudgeEntity giudge) throws SQLException{
+	static public void insertGiudge(GiudgeEntity giudge) throws SQLException{
 		// query di inserimento giudizio
 		String query = 
 			"INSERT INTO Giudizio(Voto,Giornata_idGiornata,Calciatore_idCalciatore) VALUES (?,?,?)";
@@ -673,7 +668,7 @@ public class MySQLConnection extends HttpServlet {
 	 * @return id calciatore (null in caso di calciatore non presente)
 	 * @throws SQLException sollevata quando la query fallisce
 	 */
-	public Integer getPlayerId(String name, String team) throws SQLException {
+	static public Integer getPlayerId(String name, String team) throws SQLException {
 		// query di recupero dei voti
 		preparedStatement = connection.prepareStatement(
 			"SELECT idCalciatore FROM Calciatore WHERE nome = ? AND squadra = ?");
@@ -696,7 +691,7 @@ public class MySQLConnection extends HttpServlet {
 	 * @return lista di campionati
 	 * @throws SQLException sollevata quando la query fallisce
 	 */
-	public List<ChampionshipEntity> getDefChampOfUser(Integer uid) throws SQLException{
+	static public List<ChampionshipEntity> getDefChampOfUser(Integer uid) throws SQLException{
 		// query di recupero dei campionati
 		// la query seleziona i campionati in cui sono presenti le squadre dell'utente
 		// e che sono definite, quindi che hanno generate delle giornate
@@ -726,7 +721,7 @@ public class MySQLConnection extends HttpServlet {
 	 * @return lista di squadre
 	 * @throws SQLException sollevata quando la query fallisce
 	 */
-	public List<TeamEntity> getTeamsOfUserInDay(Integer uid, Integer did) throws SQLException{
+	static public List<TeamEntity> getTeamsOfUserInDay(Integer uid, Integer did) throws SQLException{
 		// query di recupero delle squadre
 		// TODO scegliere la query più performante
 		
@@ -770,7 +765,7 @@ public class MySQLConnection extends HttpServlet {
 	 * @return la formazione
 	 * @throws SQLException sollevata quando la query fallisce
 	 */
-	public FormationEntity getFormation(Integer tid, Integer did) throws SQLException{
+	static public FormationEntity getFormation(Integer tid, Integer did) throws SQLException{
 		// query di selezione degli schieramenti 
 		preparedStatement = connection.prepareStatement(
 			"SELECT Convocazione_idConvocazione, idCalciatore, Ruolo, Riserva " +
@@ -834,7 +829,7 @@ public class MySQLConnection extends HttpServlet {
 	 * @return lista di calciatori convocati
 	 * @throws SQLException sollevata quando la query fallisce
 	 */
-	public List<PlayerEntity> getHiring(Integer tid) throws SQLException{
+	static public List<PlayerEntity> getHiring(Integer tid) throws SQLException{
 		// query di selezione delle convocazioni 
 		preparedStatement = connection.prepareStatement(
 			"SELECT idCalciatore, Nome, Ruolo, Squadra " +
@@ -860,7 +855,7 @@ public class MySQLConnection extends HttpServlet {
 	 * @return lista dei giocatori convocati
 	 * @throws SQLException sollevata quando la query fallisce
 	 */
-	public List<PlayerEntity> getHiredPlayers(Integer tid) throws SQLException{
+	static public List<PlayerEntity> getHiredPlayers(Integer tid) throws SQLException{
 		// query di recupero calciatori convocati
 		preparedStatement = connection.prepareStatement(
 			"SELECT idCalciatore, Nome, Ruolo, Squadra " +
@@ -886,7 +881,7 @@ public class MySQLConnection extends HttpServlet {
 	 * @param tid id della squadra
 	 * @return lista degli id di convocazione
 	 */
-	public List<Integer> getConvocationIds(List<Integer> players, Integer tid)
+	static public List<Integer> getConvocationIds(List<Integer> players, Integer tid)
 			throws SQLException{
 		// query per il recupero degli id di convocazione dei calciatori
 		StringBuffer getConvIdQuery = new StringBuffer(
@@ -925,7 +920,7 @@ public class MySQLConnection extends HttpServlet {
 	 * @param formation formazione da inserire
 	 * @throws SQLException sollevata quando la query fallisce
 	 */
-	public void insertFormation(FormationEntity formation) throws SQLException{
+	static public void insertFormation(FormationEntity formation) throws SQLException{
 
 		// lista dei titolari
 		List<Integer> players = new ArrayList<Integer>(); 
@@ -990,7 +985,7 @@ public class MySQLConnection extends HttpServlet {
 	 * @return lista di calciatori
 	 * @throws SQLException sollevata quando la query fallisce
 	 */
-	public List<PlayerEntity> getPlayersById(List<Integer> idList) throws SQLException {
+	static public List<PlayerEntity> getPlayersById(List<Integer> idList) throws SQLException {
 		// se non sono presenti id ritorna una lista vuota
 		if(idList.isEmpty()) return new ArrayList<PlayerEntity>();
 		// query di recupero dei voti
@@ -1027,7 +1022,7 @@ public class MySQLConnection extends HttpServlet {
 	 * @return campionato a cui appartiene la squadra
 	 * @throws SQLException sollevata quando la query fallisce
 	 */
-	public ChampionshipEntity getChampionshipOfTeam(Integer tid) throws SQLException{
+	static public ChampionshipEntity getChampionshipOfTeam(Integer tid) throws SQLException{
 		preparedStatement = connection.prepareStatement("SELECT C.idCampionato, C.Nome " +
 			"FROM Campionato C INNER JOIN Squadra S ON S.Campionato_idCampionato = C.idCampionato " +
 			"WHERE S.idSquadra = ?");
@@ -1046,7 +1041,7 @@ public class MySQLConnection extends HttpServlet {
 	 * @return campionato a cui appartiene la giornata
 	 * @throws SQLException sollevata quando la query fallisce
 	 */
-	public ChampionshipEntity getChampionshipOfDay(Integer did) throws SQLException{
+	static public ChampionshipEntity getChampionshipOfDay(Integer did) throws SQLException{
 		preparedStatement = connection.prepareStatement("SELECT C.idCampionato, C.Nome " +
 			"FROM Campionato C INNER JOIN Giornata G ON G.Campionato_idCampionato = C.idCampionato " +
 			"WHERE G.idGiornata = ?");
@@ -1066,7 +1061,7 @@ public class MySQLConnection extends HttpServlet {
 	 * @param oldFormation vecchia formazione
 	 * @throws SQLException sollevata quando la query fallisce
 	 */
-	public void updateFormation(FormationEntity newFormation, FormationEntity oldFormation) 
+	static public void updateFormation(FormationEntity newFormation, FormationEntity oldFormation) 
 		throws SQLException{
 		// prima query: recupera gli id degli schieramenti cancellati
 		String query1 = "SELECT idSchieramento " +
@@ -1095,7 +1090,7 @@ public class MySQLConnection extends HttpServlet {
 	 * @return lista delle giornate
 	 * @throws SQLException sollevata quando la query fallisce
 	 */
-	public List<DayEntity> getDaysById(List<Integer> ids) throws SQLException{
+	static public List<DayEntity> getDaysById(List<Integer> ids) throws SQLException{
 		// se non ci sono id torna una lista vuota
 		if(ids.size() == 0) return new ArrayList<DayEntity>();
 		
@@ -1124,7 +1119,7 @@ public class MySQLConnection extends HttpServlet {
 	 * @return lista di campionati
 	 * @throws SQLException sollevata quando la query fallisce
 	 */
-	public List<ChampionshipEntity> getChampionshipOfUser(Integer uid) throws SQLException {
+	static public List<ChampionshipEntity> getChampionshipOfUser(Integer uid) throws SQLException {
 		String query = "SELECT DISTINCT C.idCampionato, C.Nome " +
 			"FROM Squadra INNER JOIN Campionato C ON idCampionato = Campionato_idCampionato " +
 			"WHERE Utente_idUtente = ?";
@@ -1144,7 +1139,7 @@ public class MySQLConnection extends HttpServlet {
 	 * @return lista di coppie di squadre 
 	 * @throws SQLException sollevata quando la query fallisce
 	 */
-	public List<Pair<TeamEntity, TeamEntity>> getMatchesOfDay(Integer did) throws SQLException{
+	static public List<Pair<TeamEntity, TeamEntity>> getMatchesOfDay(Integer did) throws SQLException{
 		// la query interna effettua una join tra squadra e partita per ricavare i dati della prima squadra
 		// mentre quella esterna fa la join tra il primo risultato e nuovamente con squadra per
 		// ricavare i dati della seconda
@@ -1186,7 +1181,7 @@ public class MySQLConnection extends HttpServlet {
 	 * @return punteggio
 	 * @throws SQLException sollevata quando la query fallisce
 	 */
-	public Double getPointsOfTeamInDay(Integer tid, Integer cid, Integer did) 
+	static public Double getPointsOfTeamInDay(Integer tid, Integer cid, Integer did) 
 			throws SQLException{
 		/*
 		 *  la query recupera tutti i punteggi dei calciatori schierati dalle singole squadre
@@ -1251,7 +1246,7 @@ public class MySQLConnection extends HttpServlet {
 	 * @return punteggio
 	 * @throws SQLException sollevata quando la query fallisce
 	 */
-	public Double getPointsOfTeamInDay(Integer tid, Integer did) 
+	static public Double getPointsOfTeamInDay(Integer tid, Integer did) 
 			throws SQLException{
 		// recupera l'id del campionato separatamente
 		Integer cid = getChampionshipOfDay(did).getId();
@@ -1264,7 +1259,7 @@ public class MySQLConnection extends HttpServlet {
 	 * @return una lista di coppie (squadra,punteggio)
 	 * @throws SQLException sollevata quando la query fallisce
 	 */
-	public List<Pair<TeamEntity,Double>> getChampionshipResults(Integer cid) throws SQLException{
+	static public List<Pair<TeamEntity,Double>> getChampionshipResults(Integer cid) throws SQLException{
 		/*
 		 *  la query recupera tutti i punteggi dei calciatori schierati dalle singole squadre
 		 *  viene poi fatta la somma per squadra e ritornata a coppie (nomesquadra, sommapunti),
@@ -1329,7 +1324,7 @@ public class MySQLConnection extends HttpServlet {
 	 * @return lista di giocatori non ancora valutati
 	 * @throws SQLException sollevata quando la query fallisce
 	 */
-	public List<PlayerEntity> getUnevaluatedPlayersInDay(Integer did) throws SQLException {
+	static public List<PlayerEntity> getUnevaluatedPlayersInDay(Integer did) throws SQLException {
 		/*
 		 * Nella query esterna selezioniamo i calciatori nelle formazioni della giornata, poi controlliamo che
 		 * questi non siano tra i giocatori già valutati tramite la query interna, al termine si avranno

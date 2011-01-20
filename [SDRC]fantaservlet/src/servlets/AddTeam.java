@@ -45,15 +45,12 @@ public class AddTeam extends HttpServlet {
 		out.println(Style.pageHeader(TITLE));
 		GenericUtilities.checkLoggedIn(request, response, true);		
 		
-		// crea connessione al database
-		MySQLConnection dbc = new MySQLConnection();
-		dbc.startup();
 		List<UserEntity> lpu;
 		try {
 			// lista utenti giocanti
-			lpu = dbc.getPlayingUsers();
+			lpu = MySQLConnection.getPlayingUsers();
 			// lista campionati
-			List<ChampionshipEntity> lc = dbc.getUndefinedChampionships();
+			List<ChampionshipEntity> lc = MySQLConnection.getUndefinedChampionships();
 	
 			// controlla che esistano almeno un campionato e un utente giocatore
 			if(lpu.size() == 0 || lc.size() == 0){
@@ -74,9 +71,9 @@ public class AddTeam extends HttpServlet {
 					if(team.isComplete()){
 						nameAvailable = team.isAvailableName();
 						// TODO prendere il numero massimo di squadre per campionato da file di configurazione
-						underMaxLimit = dbc.getTeamsOfChampionship(team.getChampionship()).size() < 12;
+						underMaxLimit = MySQLConnection.getTeamsOfChampionship(team.getChampionship()).size() < 12;
 						if(nameAvailable && underMaxLimit){
-							dbc.insertTeam(team);
+							MySQLConnection.insertTeam(team);
 							// stampa avvenuto inserimento
 							out.println(Style.successMessage("Squadra "+team.getName()+" creata."));
 						}
@@ -121,10 +118,7 @@ public class AddTeam extends HttpServlet {
 			}
 		}catch (SQLException sqle) {
 			out.println(Style.alertMessage("Errore SQL: "+sqle.getMessage()));
-		}finally{
-			//chiudi connessione al database
-			dbc.destroy();			
-		}					
+		}				
 		out.println(Style.pageFooter());		
 	}
 

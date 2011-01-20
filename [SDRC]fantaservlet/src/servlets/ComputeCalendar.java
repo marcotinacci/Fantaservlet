@@ -78,13 +78,10 @@ public class ComputeCalendar extends HttpServlet {
 			}
 		}
 
-		// connessione al database
-		MySQLConnection dbc = new MySQLConnection();
-		dbc.startup();
 		// lista campionati
 		List<ChampionshipEntity> lc;
 		try {
-			lc = dbc.getUndefinedChampionships();
+			lc = MySQLConnection.getUndefinedChampionships();
 			// se ci sono campionati da definire
 			if(lc.size() > 0){
 				out.println("<form name=\"computecalendar\" method=\"POST\" >");
@@ -104,8 +101,6 @@ public class ComputeCalendar extends HttpServlet {
 			}
 		} catch (SQLException sqle) {
 			out.println(Style.alertMessage("Errore SQL: "+sqle.getMessage()));
-		}finally{
-			dbc.destroy();
 		}
 		out.println(Style.pageFooter());		
 	}

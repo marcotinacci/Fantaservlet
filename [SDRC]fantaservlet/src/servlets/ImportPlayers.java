@@ -54,8 +54,6 @@ public class ImportPlayers extends HttpServlet {
 		if(ServletFileUpload.isMultipartContent(request)) {
 			// importa i calciatori da file
 			IReadFile xls = new ReadXLS();
-			MySQLConnection dbc = new MySQLConnection();
-			dbc.startup();
 			ServletFileUpload upload = new ServletFileUpload(new DiskFileItemFactory());
 			// interpreta l'unico parametro
 			FileItem item;
@@ -70,7 +68,7 @@ public class ImportPlayers extends HttpServlet {
 					PlayerEntity p = (PlayerEntity)it.next();
 					// inserisci calciatore
 					try{
-						dbc.insertPlayer(p);
+						MySQLConnection.insertPlayer(p);
 						// stampa calciatore
 						out.println(Style.successMessage("Inserito calciatore "+p.toString()));			
 					}catch(SQLException sqle){
@@ -80,8 +78,6 @@ public class ImportPlayers extends HttpServlet {
 				}
 			} catch (FileUploadException e) {
 				out.println(Style.alertMessage("Errore FileUpload: "+e.getMessage()));
-			}finally{
-				dbc.destroy();
 			}
 		}
 		// stampa il form di importazione
