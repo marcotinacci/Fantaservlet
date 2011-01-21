@@ -195,8 +195,6 @@ public class AddReport extends HttpServlet {
 		}			
 
 		out.println(Style.pageFooter());
-		// chiudi la connessione al database
-		MySQLConnection.destroy();
 	}
 
 	/**
