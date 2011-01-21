@@ -137,7 +137,7 @@ public class AddReport extends HttpServlet {
 			
 			code.append("</select><br>");
 			code.append(Style.hidden("todo", "insAction"));			
-			code.append("<input type=\"submit\" value=\"Inserisci azione\">");
+			code.append("<input type=\"submit\" value=\"Inserisci\">");
 			code.append("</form>");
 			
 			code.append("<h2>Aggiungi giudizio</h2>");	
@@ -185,7 +185,7 @@ public class AddReport extends HttpServlet {
 			
 			code.append("</select><br>");
 			code.append(Style.hidden("todo", "insGiudge"));
-			code.append("<input type=\"submit\" value=\"Inerisci giudizio\">");
+			code.append("<input type=\"submit\" value=\"Inserisci\">");
 			code.append("</form>");
 			out.println(code);
 		} catch (SQLException sqle) {
