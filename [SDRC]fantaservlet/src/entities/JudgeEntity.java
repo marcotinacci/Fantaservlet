@@ -2,23 +2,23 @@ package entities;
 
 import utils.GenericUtilities;
 
-public class GiudgeEntity {
+public class JudgeEntity {
 	
 	private Integer id;
 	private Integer day;
 	private Integer player;
 	private Double vote;
 	
-	public GiudgeEntity(){
+	public JudgeEntity(){
 	}
 	
-	public GiudgeEntity(Integer day, Integer player, Double vote){
+	public JudgeEntity(Integer day, Integer player, Double vote){
 		this.day = day;
 		this.player = player;
 		this.vote = vote;
 	}
 	
-	public GiudgeEntity(Integer id, Integer day, Integer player, Double vote){
+	public JudgeEntity(Integer id, Integer day, Integer player, Double vote){
 		this.id = id;
 		this.day = day;
 		this.player = player;

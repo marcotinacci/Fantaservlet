@@ -5,7 +5,7 @@ import java.util.List;
 
 import utils.Pair;
 
-import entities.GiudgeEntity;
+import entities.JudgeEntity;
 import entities.PlayerEntity;
 import entities.ReportEntity;
 
@@ -30,5 +30,5 @@ public interface IReadFile {
 	 * e codice calciatore (il codice giornata è nullo e deve essere impostato 
 	 * successivamente)
 	 */
-	public Pair<List<ReportEntity>,List<GiudgeEntity>> getReports(InputStream in);
+	public Pair<List<ReportEntity>,List<JudgeEntity>> getReports(InputStream in);
 }

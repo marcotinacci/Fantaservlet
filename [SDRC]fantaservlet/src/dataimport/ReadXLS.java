@@ -14,7 +14,7 @@ import org.apache.poi.ss.usermodel.Row;
 
 import utils.Pair;
 import dataconnection.MySQLConnection;
-import entities.GiudgeEntity;
+import entities.JudgeEntity;
 import entities.PlayerEntity;
 import entities.ReportEntity;
 
@@ -27,11 +27,11 @@ public class ReadXLS implements IReadFile {
 	// TODO come eliminare la connessione al database da getreports?
 	
 	@Override
-	public Pair<List<ReportEntity>,List<GiudgeEntity>> getReports(InputStream in) {
+	public Pair<List<ReportEntity>,List<JudgeEntity>> getReports(InputStream in) {
 		// lista dei report delle azioni
 		List<ReportEntity> lr = new ArrayList<ReportEntity>();
 		// lista dei giudizi dei calciatori
-		List<GiudgeEntity> lg = new ArrayList<GiudgeEntity>();
+		List<JudgeEntity> lg = new ArrayList<JudgeEntity>();
 		try {
 			// estrai i dati dal file xls
 			POIFSFileSystem fileSystem = null;
@@ -56,7 +56,7 @@ public class ReadXLS implements IReadFile {
 				// giudizio
 				if(row.getCell(4).getCellType() == Cell.CELL_TYPE_NUMERIC){
 					double temp = row.getCell(4).getNumericCellValue();
-					lg.add(new GiudgeEntity(null, pid, temp));
+					lg.add(new JudgeEntity(null, pid, temp));
 				}
 				
 				// gol segnati (1)
@@ -104,7 +104,7 @@ public class ReadXLS implements IReadFile {
 			lr = null;
 			sqle.printStackTrace();				
 		}
-		return new Pair<List<ReportEntity>, List<GiudgeEntity>>(lr, lg);
+		return new Pair<List<ReportEntity>, List<JudgeEntity>>(lr, lg);
 	}
 	
 	@Override

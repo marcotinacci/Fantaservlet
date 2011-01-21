@@ -19,7 +19,7 @@ import view.Style;
 import dataconnection.MySQLConnection;
 import entities.ChampionshipEntity;
 import entities.DayEntity;
-import entities.GiudgeEntity;
+import entities.JudgeEntity;
 import entities.PlayerEntity;
 import entities.ReportEntity;
 import entities.VoteEntity;
@@ -69,7 +69,7 @@ public class AddReport extends HttpServlet {
 				}
 				
 			}else if(todo.equals("insGiudge")){
-				GiudgeEntity giudge = new GiudgeEntity();
+				JudgeEntity giudge = new JudgeEntity();
 				BeanUtilities.populateBean(giudge,request);
 				// se è stato inserito un giudizio
 				if(giudge.isComplete()){

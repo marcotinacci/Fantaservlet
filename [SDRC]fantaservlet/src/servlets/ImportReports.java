@@ -27,7 +27,7 @@ import dataimport.IReadFile;
 import dataimport.ReadXLS;
 import entities.ChampionshipEntity;
 import entities.DayEntity;
-import entities.GiudgeEntity;
+import entities.JudgeEntity;
 import entities.ReportEntity;
 import exceptions.BadFormException;
 
@@ -60,7 +60,7 @@ public class ImportReports extends HttpServlet {
 		{
 			try{
 				// TODO problemi inizializzazione
-				Pair<List<ReportEntity>,List<GiudgeEntity>> lists = null;
+				Pair<List<ReportEntity>,List<JudgeEntity>> lists = null;
 				// TODO problemi inizializzazione	
 				Integer did = -1;
 				ServletFileUpload upload = new ServletFileUpload(new DiskFileItemFactory());
@@ -97,8 +97,8 @@ public class ImportReports extends HttpServlet {
 					}
 				}
 				// per ogni giudge
-				for(Iterator<GiudgeEntity> it = lists.getSecond().iterator(); it.hasNext();){
-					GiudgeEntity rep = it.next();
+				for(Iterator<JudgeEntity> it = lists.getSecond().iterator(); it.hasNext();){
+					JudgeEntity rep = it.next();
 					// aggiorna i dati con il codice della giornata
 					rep.setDay(did);
 					// se il giudge è completo inseriscilo nel database

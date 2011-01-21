@@ -648,7 +648,7 @@ public class MySQLConnection{
 	 * @param giudge giudizio da inserire
 	 * @throws SQLException sollevata quando la query fallisce
 	 */
-	static public void insertGiudge(GiudgeEntity giudge) throws SQLException{
+	static public void insertGiudge(JudgeEntity giudge) throws SQLException{
 		// query di inserimento giudizio
 		String query = 
 			"INSERT INTO Giudizio(Voto,Giornata_idGiornata,Calciatore_idCalciatore) VALUES (?,?,?)";
