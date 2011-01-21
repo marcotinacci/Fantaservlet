@@ -67,7 +67,7 @@ public class ShowResults extends HttpServlet {
 					out.println(Style.option(c.getId().toString(),c.getName()));
 				}
 				out.println("</select>");
-				out.println("<input type=\"submit\" value=\"Visualizza risultati\">");
+				out.println("<input type=\"submit\" value=\"Visualizza\">");
 				out.println("</form>");					
 			}	
 		}catch (SQLException sqle) {

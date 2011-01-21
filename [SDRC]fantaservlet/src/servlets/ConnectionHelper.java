@@ -18,13 +18,11 @@ public class ConnectionHelper extends HttpServlet {
 	@Override
 	public void init() throws ServletException {
 		MySQLConnection.startup(getServletContext().getRealPath("/fantaservlet.properties"));
-		super.init();
 	}
 	
 	@Override
 	public void destroy() {
 		MySQLConnection.destroy();
-		super.destroy();
 	}
        
     /**
