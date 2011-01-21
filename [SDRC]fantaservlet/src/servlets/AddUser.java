@@ -76,10 +76,10 @@ public class AddUser extends HttpServlet {
 		out.println("Nome utente: <input type=\"text\" name=\"name\"/><br/>");
 		out.println("Password: <input type=\"password\" name=\"password\"/><br/>");
 		out.println("Conferma: <input type=\"password\" name=\"confirm\"/><br/>");
-		out.println("Admin <input type=\"checkbox\" name=\"admin\"/><br/>");
+		out.println("Admin <input type=\"checkbox\" name=\"admin\"/>");
 		out.println("<input type=\"hidden\" name=\"todo\" value=\"insertUser\"/><br/><br/>");		
 		out.println("<input type=\"submit\" value=\"crea\"/>");
-		out.println("</form>");		
+		out.println("</form>");
 		
 		out.println(Style.pageFooter());		
 	}
