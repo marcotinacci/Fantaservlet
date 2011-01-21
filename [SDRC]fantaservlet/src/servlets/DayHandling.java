@@ -126,6 +126,7 @@ public class DayHandling extends HttpServlet {
 				code.append("<tr><td>"+d.getFormatDate()+"</td><td>");
 				code.append("<form name=\"closeday\" method=\"get\">");
 				code.append("<input type=\"hidden\" name=\"closeday\" value=\""+d.getId()+"\">");
+				code.append("<br/><br/>");
 				if(d.isClose()){
 					code.append("<input type=\"submit\" value=\"Chiudi\" class=\"disabledButton\" disabled>");
 				}else{
@@ -135,6 +136,7 @@ public class DayHandling extends HttpServlet {
 				code.append("</td><td>");
 				code.append("<form name=\"openday\" method=\"get\">");
 				code.append("<input type=\"hidden\" name=\"openday\" value=\""+d.getId()+"\">");
+				code.append("<br/><br/>");
 				if(d.isEvaluated() || !d.isClose()){
 					code.append("<input type=\"submit\" value=\"Apri\" class=\"disabledButton\" disabled>");
 				}else{
@@ -144,6 +146,7 @@ public class DayHandling extends HttpServlet {
 				code.append("</td><td>");
 				code.append("<form name=\"closeday\" method=\"get\">");
 				code.append("<input type=\"hidden\" name=\"evaluateday\" value=\""+d.getId()+"\">");
+				code.append("<br/><br/>");
 				if(d.isEvaluated()){
 					code.append("<input type=\"submit\" value=\"Valuta\" class=\"disabledButton\" disabled>");
 				}else{

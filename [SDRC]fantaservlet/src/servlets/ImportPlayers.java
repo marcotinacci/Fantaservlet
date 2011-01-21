@@ -82,7 +82,7 @@ public class ImportPlayers extends HttpServlet {
 		}
 		// stampa il form di importazione
 		out.println("<form name=\"importplayers\" method=\"POST\" enctype=\"multipart/form-data\">");
-		out.println("File: <input type=\"file\" name=\"file\"><br>");
+		out.println("File: <input type=\"file\" name=\"file\"><br/><br/>");
 		out.println("<input type=\"submit\" value=\"Importa\">");
 		out.println("</form>");
 		

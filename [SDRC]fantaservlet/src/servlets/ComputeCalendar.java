@@ -91,7 +91,7 @@ public class ComputeCalendar extends HttpServlet {
 					ChampionshipEntity c = it.next();
 					out.println(Style.option(c.getId().toString(),c.getName()));
 				}
-				out.println("</select><br>");
+				out.println("</select><br/><br/>");
 				out.println("<input type=\"hidden\" name=\"startDate\" value=\""+
 					(Calendar.getInstance().getTimeInMillis()+1000*60*60*24*7)+"\">");
 				out.println("<input type=\"submit\" value=\"crea\">");

@@ -77,7 +77,7 @@ public class AddUser extends HttpServlet {
 		out.println("Password: <input type=\"password\" name=\"password\"/><br/>");
 		out.println("Conferma: <input type=\"password\" name=\"confirm\"/><br/>");
 		out.println("Admin <input type=\"checkbox\" name=\"admin\"/><br/>");
-		out.println("<input type=\"hidden\" name=\"todo\" value=\"insertUser\"/><br/>");		
+		out.println("<input type=\"hidden\" name=\"todo\" value=\"insertUser\"/><br/><br/>");		
 		out.println("<input type=\"submit\" value=\"crea\"/>");
 		out.println("</form>");		
 		

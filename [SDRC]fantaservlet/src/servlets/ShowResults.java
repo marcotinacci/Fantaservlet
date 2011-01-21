@@ -66,7 +66,7 @@ public class ShowResults extends HttpServlet {
 					ChampionshipEntity c = it.next();
 					out.println(Style.option(c.getId().toString(),c.getName()));
 				}
-				out.println("</select>");
+				out.println("</select><br/><br/>");
 				out.println("<input type=\"submit\" value=\"Visualizza\">");
 				out.println("</form>");					
 			}	

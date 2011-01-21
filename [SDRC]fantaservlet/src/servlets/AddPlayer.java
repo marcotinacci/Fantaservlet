@@ -66,8 +66,9 @@ public class AddPlayer extends HttpServlet {
 		out.println("<input type=\"radio\" name=\"rule\" value=\"C\"> centrocampista");
 		out.println("<input type=\"radio\" name=\"rule\" value=\"D\"> difensore");
 		out.println("<input type=\"radio\" name=\"rule\" value=\"P\" checked=\"checked\"> portiere");
-		out.println("<br>");
-		out.println("Squadra di provenienza: <input type=\"text\" name=\"team\">"); 
+		out.println("<br/>");
+		out.println("Squadra di provenienza: <input type=\"text\" name=\"team\">");
+		out.println("<br/><br/>");
 		out.println("<input type=\"submit\" value=\"crea\">");
 		out.println("</form>");
 		

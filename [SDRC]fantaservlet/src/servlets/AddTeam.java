@@ -112,7 +112,7 @@ public class AddTeam extends HttpServlet {
 					out.println(Style.option(c.getId().toString(),c.getName()));
 				}
 				
-				out.println("</select><br>");
+				out.println("</select><br/><br/>");
 				out.println("<input type=\"submit\" value=\"crea\">");
 				out.println("</form>");		
 			}

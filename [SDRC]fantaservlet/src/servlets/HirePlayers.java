@@ -183,7 +183,7 @@ public class HirePlayers extends HttpServlet {
 						ChampionshipEntity c = it.next();
 						out.println(Style.option(c.getId().toString(),c.getName()));
 					}
-					out.println("</select><br>\n");
+					out.println("</select><br/><br/>\n");
 					out.println("<input type=\"submit\" value=\"scegli\">\n");
 					out.println("</form>\n");					
 				}

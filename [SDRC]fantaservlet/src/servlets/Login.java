@@ -83,7 +83,7 @@ public class Login extends HttpServlet {
 		// stampa form di login
 		out.println("<form name=\"login\" method=\"POST\">");
 		out.println("User: <input type=\"text\" name=\"nome\"><br>");
-		out.println("Password: <input type=\"password\" name=\"password\"><br>");
+		out.println("Password: <input type=\"password\" name=\"password\"><br/><br/>");
 		out.println("<input type=\"submit\" value=\"login\">");
 		out.println("</form>");	
 		

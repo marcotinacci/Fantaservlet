@@ -141,7 +141,7 @@ public class PrintPDF extends HttpServlet {
 			out.println("<form action=\"PrintPDF\" method=\"POST\">");
 			out.println("<input type=\"checkbox\"/ name=\"hire\" checked>Dati squadre<br/>");
 			out.println("<input type=\"checkbox\" name=\"match\"/ checked>Risultati partite<br/>");
-			out.println("<input type=\"checkbox\" name=\"champ\"/ checked>Classifiche dei campionati<br/>");
+			out.println("<input type=\"checkbox\" name=\"champ\"/ checked>Classifiche dei campionati<br/><br/>");
 			out.println(Style.hidden("todo", "printPDF"));
 			out.println("<input type=\"submit\"/>");
 			out.println("</form>");

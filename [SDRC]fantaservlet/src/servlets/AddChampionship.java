@@ -69,7 +69,7 @@ public class AddChampionship extends HttpServlet {
 		// stampa il form di inserimento
 		out.println("<form name=\"addchamp\" method=\"POST\">");
 		out.println("Nome: <input type=\"text\" name=\"name\"/>"); 
-		out.println("<br/>");
+		out.println("<br/><br/>");
 		out.println("<input type=\"submit\" value=\"crea\"/>");
 		out.println("</form>");
 		

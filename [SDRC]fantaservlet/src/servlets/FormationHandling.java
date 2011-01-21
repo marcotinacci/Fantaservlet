@@ -86,6 +86,7 @@ public class FormationHandling extends HttpServlet {
 			}
 			code.append("</select>\n");
 			code.append("<input type=\"hidden\" name=\"todo\" value=\"viewday\">\n");
+			code.append("<br/><br/>");
 			code.append("<input type=\"submit\" value=\"Visualizza\">\n");
 			code.append("</form>\n");
 			if(anyDays){
@@ -251,10 +252,10 @@ public class FormationHandling extends HttpServlet {
 										"golkeep","idGolkeep",formation.getGolkeep(),formation.getResGolkeep()));
 								out.println(Style.hidden("day", did.toString()));
 								out.println(Style.hidden("team", team.getId().toString()));
-					
+								out.println("<br/><br/>");
 								// se esisteva giˆ una formazione
 								if(!formation.isEmpty()){
-									out.println(Style.hidden("todo", "modformation"));								
+									out.println(Style.hidden("todo", "modformation"));
 									out.println("<input type=\"submit\" value=\"Modifica\">");
 								}else{
 									out.println(Style.hidden("todo", "insformation"));

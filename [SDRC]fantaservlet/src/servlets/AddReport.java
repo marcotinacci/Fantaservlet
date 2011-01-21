@@ -135,7 +135,7 @@ public class AddReport extends HttpServlet {
 				code.append(Style.option(p.getId().toString(),p.getName()));
 			}
 			
-			code.append("</select><br>");
+			code.append("</select><br/><br/>");
 			code.append(Style.hidden("todo", "insAction"));			
 			code.append("<input type=\"submit\" value=\"Inserisci\">");
 			code.append("</form>");
@@ -183,7 +183,7 @@ public class AddReport extends HttpServlet {
 				code.append(Style.option(p.getId().toString(),p.getName()));
 			}
 			
-			code.append("</select><br>");
+			code.append("</select><br/><br/>");
 			code.append(Style.hidden("todo", "insGiudge"));
 			code.append("<input type=\"submit\" value=\"Inserisci\">");
 			code.append("</form>");

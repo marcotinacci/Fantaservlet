@@ -78,9 +78,9 @@ public class ChangePassword extends HttpServlet {
 		out.println("Vecchia password: <input type=\"password\" name=\"oldpassword\"/><br/>");
 		out.println("Nuova password: <input type=\"password\" name=\"password\"/><br/>");
 		out.println("Conferma: <input type=\"password\" name=\"confirm\"/><br/>");		
-		out.println("<input type=\"hidden\" name=\"todo\" value=\"modPassword\"/><br/>");		
+		out.println("<input type=\"hidden\" name=\"todo\" value=\"modPassword\"/><br/><br/>");		
 		out.println("<input type=\"submit\" value=\"crea\"/>");
-		out.println("</form>");			
+		out.println("</form>");
 		
 		out.println(Style.pageFooter());		
 	}

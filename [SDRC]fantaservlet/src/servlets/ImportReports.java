@@ -160,7 +160,7 @@ public class ImportReports extends HttpServlet {
 				throw new BadFormException("Non ci sono giornate");
 			}
 			code.append("</select><br>");
-			code.append("File: <input type=\"file\" name=\"file\"><br>");
+			code.append("File: <input type=\"file\" name=\"file\"><br/><br/>");
 			code.append("<input type=\"submit\" value=\"Importa\">");
 			code.append("</form>");
 			out.println(code);
