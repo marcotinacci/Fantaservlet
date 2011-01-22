@@ -105,13 +105,13 @@ public class FormationEntity {
 			List<Integer> att, List<Integer> cen, List<Integer> def, List<Integer> golkeep,
 			List<Integer> resAtt, List<Integer> resCen, List<Integer> resDef, List<Integer> resGolkeep,
 			Integer team, Integer day){
+		// id squadra
+		this.team = team;
+		// id giornata
+		this.day = day;
 		try {
 			// salva il modulo della formazione
 			formation = Config.getFormationIndex(def.size(), cen.size(), att.size());
-			// id squadra
-			this.team = team;
-			// id giornata
-			this.day = day;
 			// inserisci i difensori titolari
 			switch(def.size()){
 			case 8: setIdDef8(def.get(7)); setDef8(2);
@@ -191,7 +191,8 @@ public class FormationEntity {
 			case 1: setIdGolkeep1(resGolkeep.get(count-1)); setGolkeep1(1); count--; if(count==0) break;			
 			}
 		} catch (BadModuleException e) {
-			e.printStackTrace();
+			// in caso di formazione non valida salta il completamento dei dati
+			//e.printStackTrace();
 		}
 		
 	}
